@@ -8,9 +8,9 @@
 		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>net.inkuk</groupId>
+    <groupId>net.inkuk</groupId>
 	<artifactId>simple-article</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 	<name>simple-article</name>
 	<description>simple article backend</description>
 	<url/>
@@ -65,12 +65,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version> <!-- Use the latest stable version -->
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
 		</plugins>
 	</build>
-
 </project>

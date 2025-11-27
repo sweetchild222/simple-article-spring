@@ -1,0 +1,15 @@
+sudo mysql -u root -p
+
+create database simple_article;
+show simple_article;
+use simple_article;
+
+create user 'simple_article_admin'@'%' identified by 'adminSweetchild@0617';
+create user 'simple_article_api'@'%' identified by 'apiSweetchild@0617';
+
+GRANT ALL PRIVILEGES ON simple_article.* TO 'simple_article_admin'@'%' IDENTIFIED BY 'adminSweetchild@0617' with GRANT OPTION;
+GRANT ALL PRIVILEGES ON simple_article.* TO 'simple_article_api'@'%' IDENTIFIED BY 'apiSweetchild@0617' with GRANT OPTION;
+
+revoke create, alter, drop on simple_article.* from 'simple_article_api'@'%';
+
+flush privileges;

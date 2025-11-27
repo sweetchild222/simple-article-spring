@@ -1,0 +1,8 @@
+#upload
+scp -i T02PRF.pem target\simple-article-0.0.1.jar ubuntu@13.124.193.201:~/simple/.
+
+#run
+ssh -i T02PRF.pem ubuntu@13.124.193.201 "./simple/run.sh"
+
+#kill
+ssh -i T02PRF.pem ubuntu@13.124.193.201 "pkill -e 'java' || echo 'no pid'"

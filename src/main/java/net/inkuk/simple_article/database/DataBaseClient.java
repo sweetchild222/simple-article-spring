@@ -26,14 +26,15 @@ public class DataBaseClient {
             final String user = "simple_article_api";
             final String password = "apiSweetchild@0617";
 
+            System.out.println("try connect");
+
             return DriverManager.getConnection(url, user, password);
 
         } catch (ClassNotFoundException | SQLException e) {
 
-            System.out.println(e.toString());
+            System.out.println("connect: " + e.toString());
+            return null;
         }
-
-        return null;
     }
 
 
@@ -42,25 +43,24 @@ public class DataBaseClient {
         if(this.connection != null) {
 
             try {
-                if (!this.connection.isClosed()) {
-                    this.connection.close();
-                    this.connection = null;
-                }
-                else
-                    System.out.println("non closed");
+
+                System.out.println("close connect");
+                this.connection.close();
+                this.connection = null;
             }
             catch(SQLException e){
-                System.out.println(e.toString());
+
+                System.out.println("close: " + e.toString());
             }
         }
     }
 
 
-    public Map<String, Object> selectRow(String sql) {
+    public Map<String, Object> getRow(String sql) {
 
         try {
 
-            ResultSet resultSet = execute(sql);
+            ResultSet resultSet = executeSelect(sql);
 
             if (resultSet == null)
                 return null;
@@ -73,26 +73,71 @@ public class DataBaseClient {
         }
         catch (SQLException e) {
 
-            System.out.println(e.toString());
+            if(e instanceof SQLNonTransientConnectionException)
+                close();
+
+            System.out.println("getRow: " + e.toString());
+            return null;
         }
-
-        return null;
-
     }
 
 
-    private ResultSet execute(String sql) throws SQLException {
 
-        if(this.connection != null) {
+    public long postRow(String sql) {
 
-            if(this.connection.isClosed()) {
-                this.connection = null;
+        try {
+
+            ResultSet resultSet = executeInsert(sql);
+
+            if (resultSet == null)
+                return -1;
+
+            return resultSet.first() ? resultSet.getLong(1) : -1;
+        }
+        catch (SQLException e) {
+
+            if(e instanceof SQLNonTransientConnectionException) {
+
+                close();
+                System.out.println("postRow: " + e.toString());
             }
-        }
 
-        if(this.connection == null) {
-            this.connection = this.connect();
+            System.out.println("postRow: " + e.toString());
+
+            return -1;
         }
+    }
+
+
+    public int updateRow(String sql) {
+
+        try {
+
+            return executeUpdate(sql);
+        }
+        catch (SQLException e) {
+
+            if(e instanceof SQLNonTransientConnectionException) {
+
+                close();
+                System.out.println("updateRow: " + e.toString());
+            }
+
+            System.out.println("updateRow: " + e.toString());
+
+            return -1;
+        }
+    }
+
+
+    private ResultSet executeSelect(String sql) throws SQLException {
+
+        if(this.connection != null)
+            if(this.connection.isClosed())
+                this.connection = null;
+
+        if(this.connection == null)
+            this.connection = this.connect();
 
         if(this.connection == null)
             return null;
@@ -105,6 +150,55 @@ public class DataBaseClient {
         statement.closeOnCompletion();
 
         return statement.executeQuery(sql);
+    }
+
+
+    private ResultSet executeInsert(String sql) throws SQLException {
+
+        if(this.connection != null)
+            if(this.connection.isClosed())
+                this.connection = null;
+
+        if(this.connection == null)
+            this.connection = this.connect();
+
+        if(this.connection == null)
+            return null;
+
+        Statement statement = this.connection.createStatement();
+
+        if(statement == null)
+            return null;
+
+        statement.closeOnCompletion();
+
+        if(statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS) != 1)
+            return null;
+
+        return statement.getGeneratedKeys();
+    }
+
+
+    private int executeUpdate(String sql) throws SQLException {
+
+        if(this.connection != null)
+            if(this.connection.isClosed())
+                this.connection = null;
+
+        if(this.connection == null)
+            this.connection = this.connect();
+
+        if(this.connection == null)
+            return -1;
+
+        Statement statement = this.connection.createStatement();
+
+        if(statement == null)
+            return -1;
+
+        statement.closeOnCompletion();
+
+        return statement.executeUpdate(sql);
     }
 
 
@@ -123,7 +217,6 @@ public class DataBaseClient {
             final String columnName = metaData.getColumnName(i);
 
             switch (columnType) {
-
                 case Types.LONGNVARCHAR:
                 case Types.CHAR:
                 case Types.VARCHAR:
@@ -138,8 +231,12 @@ public class DataBaseClient {
                     map.put(columnName, resultSet.getLong(i));
                     break;
 
+                case Types.TINYINT:
+                    map.put(columnName, resultSet.getInt(i));
+                    break;
+
                 default:
-                    System.out.println(columnName + ": abnormal type " + String.valueOf(columnType));
+                    System.out.println(columnName + ": unsupported type " + String.valueOf(columnType));
                     return null;
             }
         }

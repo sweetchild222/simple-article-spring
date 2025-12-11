@@ -2,6 +2,7 @@ package net.inkuk.simple_article.authorization;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -35,6 +36,9 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/authenticate").permitAll()
+                        .requestMatchers("/mailVerify").permitAll()
+                        .requestMatchers("/username/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         //.requestMatchers("/welcome").hasRole("ADMIN")
                         .anyRequest().authenticated()
         );

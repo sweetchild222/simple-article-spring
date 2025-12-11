@@ -2,6 +2,7 @@ package net.inkuk.simple_article;
 
 
 import jakarta.annotation.PostConstruct;
+import net.inkuk.simple_article.database.DataBaseClientPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -54,6 +55,7 @@ public class SimpleArticleApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
 
 
     }

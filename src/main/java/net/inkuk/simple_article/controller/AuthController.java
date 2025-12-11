@@ -28,13 +28,13 @@ public class AuthController {
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody Map<String, String> requestBody){
+    public ResponseEntity<?> postAuthenticate(@RequestBody Map<String, String> requestBody){
 
         final String username = requestBody.get("username");
         final String password = requestBody.get("password");
 
         if(username == null || password == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         try {
 
@@ -42,17 +42,17 @@ public class AuthController {
             authenticationManager.authenticate(token);
 
         } catch (BadCredentialsException e) {
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         final SecurityUser securityUser = (SecurityUser)userDetailsServiceImpl.loadUserByUsername(username);
 
         if(securityUser.isInvalid())
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         final String jwt = jwtUtil.generateToken(securityUser.getUsername());
 
-        return ResponseEntity.ok(Map.of("jwt", jwt, "user_id", securityUser.getID()));
+        return new ResponseEntity<>(Map.of("jwt", jwt, "user_id", securityUser.getID()), HttpStatus.OK);
+
     }
 }

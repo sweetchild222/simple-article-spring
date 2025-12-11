@@ -14,20 +14,22 @@ public class SecurityUser implements UserDetails {
     private final long id;
     private final String username;
     private final String password;
+    private final boolean verfied;
     private final List<GrantedAuthority> authorityList;
 
-    public SecurityUser(long id, String username, String password, List<GrantedAuthority> authorityList) {
+    public SecurityUser(long id, String username, String password, boolean verfied, List<GrantedAuthority> authorityList) {
 
         this.id = id;
         this.username = username;
         this.password = password;
+        this.verfied = verfied;
         this.authorityList = authorityList;
     }
 
 
     public static SecurityUser createInvalidUser(){
 
-        return new SecurityUser(-1, null, null, null);
+        return new SecurityUser(-1, null, null, false, null);
     }
 
 
@@ -89,6 +91,6 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.verfied;
     }
 }

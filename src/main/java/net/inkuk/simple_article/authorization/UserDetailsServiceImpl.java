@@ -22,6 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final String sql = "select id, username, password, role from user where username = '" + username + "'";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
+        ㄴㅇ
 
         if(map == null)
             return SecurityUser.createInvalidUser();

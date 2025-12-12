@@ -20,6 +20,9 @@ import java.util.Objects;
 @RestController
 public class UserController {
 
+    final int minPasswordLength = 8;
+    final int maxPasswordLength = 20;
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
 
@@ -64,6 +67,9 @@ public class UserController {
         if(username == null || password == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(password.length() < this.minPasswordLength || password.length() > maxPasswordLength)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         String sql = "insert into user (username, password) values (";
         sql += "'" + username + "', ";
         sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "')";
@@ -81,29 +87,48 @@ public class UserController {
 
         final Map<String, String> items = new java.util.HashMap<>(Map.of());
 
-        final String password = (String)payload.get("password");
-        if(password != null)
-            items.put("password", "'" + (new BCryptPasswordEncoder()).encode(password) + "'");
+        final Boolean is_delete = (Boolean)payload.get("delete");
+        if(is_delete != null) {
+            if(!(is_delete && payload.size() == 1))
+                return null;
 
-        if(payload.containsKey("profile")){
+            items.put("delete_at", "current_timestamp()");
+            items.put("username", "null");
+            items.put("profile", "null");
+            items.put("password", "null");
+
+            return items;
+        }
+
+        final String password = (String)payload.get("password");
+        if(password != null) {
+            if(password.length() < this.minPasswordLength || password.length() > this.maxPasswordLength)
+                return null;
+
+            if(payload.size() != 1)
+                return null;
+
+            items.put("password", "'" + (new BCryptPasswordEncoder()).encode(password) + "'");
+            return items;
+        }
+
+        if(payload.containsKey("profile")) {
             final String profile = (String)payload.get("profile");
             items.put("profile", (profile != null ? ("'" + profile + "'") : "null"));
         }
 
         final String role = (String)payload.get("role");
         if(role != null) {
-            if (!Arrays.asList(new String[]{"ADMIN", "USER"}).contains(role))
+            if (!Arrays.asList(new String[]{"ADMIN", "USER"}).contains(role.toUpperCase()))
                 return null;
 
             items.put("role", "'" + role + "'");
         }
 
-        final Boolean is_delete = (Boolean)payload.get("delete");
-        if(is_delete != null)
-            items.put("delete_at", is_delete ? "current_timestamp()" : "null");
 
         if(items.size() != payload.size())
             return null;
+
 
         return items;
     }

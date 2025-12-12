@@ -8,11 +8,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class MailService {
 
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "sweetchild22.ik@gmail.com";
+
+    public MailService(JavaMailSender javaMailSender){
+        this.javaMailSender = javaMailSender;
+    }
 
     public MimeMessage createMail(String mail, long number) {
 

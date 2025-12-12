@@ -6,8 +6,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ContextClosedEventTest {
 
+public class ContextClosedEventTest {
     @EventListener
     public void event(ContextClosedEvent event) {
 

@@ -27,9 +27,9 @@ public class MailController {
     }
 
     @PostMapping("/mailVerify")
-    public ResponseEntity<?> postMailVerify(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<?> postMailVerify(@RequestBody Map<String, String> payload) {
 
-        this.mail = requestBody.get("mail");
+        this.mail = payload.get("mail");
 
         if(this.mail == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -51,26 +51,32 @@ public class MailController {
     }
 
 
-    @GetMapping("/mailVerify")
-    public ResponseEntity<?> getMailVerify(@RequestParam String mail, @RequestParam long number) {
+    @PatchMapping("/mailVerify/{mail}")
+    public ResponseEntity<?> patchMailVerify(@PathVariable String mail, @RequestBody Map<String, Long> payload) {
 
         if(this.mail == null || this.number == -1)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
+        final long number = payload.get("number");
+
         boolean isMatch = this.mail.equals(mail) && (this.number == number);
 
-        if(isMatch){
+        if(!isMatch)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-            final String sql = "update user set verified = 1 where username = '" + mail + "'";
+        final String sql = "update user set verified = 1 where username = '" + mail + "'";
 
-            int affectCount = DataBaseClientPool.getClient().updateRow(sql);
+        final int affectCount = DataBaseClientPool.getClient().updateRow(sql);
 
-            if(affectCount == -1)
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            else if(affectCount == 0)
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(affectCount == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(affectCount == 0)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else if(affectCount == 1)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else {
+            System.out.println("unexcepted result: " + String.valueOf(affectCount));
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(Map.of("isMatched", isMatch), HttpStatus.OK);
     }
 }

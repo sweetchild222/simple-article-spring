@@ -227,6 +227,7 @@ public class DataBaseClient {
                     map.put(columnName, resultSet.getTimestamp(i).getTime());
                     break;
 
+                case Types.BIGINT:
                 case Types.INTEGER:
                     map.put(columnName, resultSet.getLong(i));
                     break;

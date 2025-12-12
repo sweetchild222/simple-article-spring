@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class UserContext {
 
-    public long userID(){
+    public static long userID(){
 
         SecurityUser securityUser = (SecurityUser) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 

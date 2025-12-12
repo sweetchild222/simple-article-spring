@@ -2,7 +2,9 @@ package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.authorization.SecurityUser;
 import net.inkuk.simple_article.database.DataBaseClientPool;
+import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.UserContext;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -75,45 +77,47 @@ public class UserController {
     }
 
 
+    private Map<String, String> payloadToSqlItems(final Map<String, Object> payload){
 
-    @PatchMapping("/user/{userId}")
-    public ResponseEntity<?> patchUser(@PathVariable long userId, @RequestBody Map<String, Object> payload) {
-
-        Map<String, Object> params = new java.util.HashMap<>(Map.of());
+        final Map<String, String> items = new java.util.HashMap<>(Map.of());
 
         final String password = (String)payload.get("password");
         if(password != null)
-            params.put("password", "'" + (new BCryptPasswordEncoder()).encode(password) + "'");
+            items.put("password", "'" + (new BCryptPasswordEncoder()).encode(password) + "'");
 
         if(payload.containsKey("profile")){
             final String profile = (String)payload.get("profile");
-            params.put("profile", (profile != null ? ("'" + profile + "'") : "null"));
+            items.put("profile", (profile != null ? ("'" + profile + "'") : "null"));
         }
 
         final String role = (String)payload.get("role");
         if(role != null) {
             if (!Arrays.asList(new String[]{"ADMIN", "USER"}).contains(role))
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return null;
 
-            params.put("role", "'" + role + "'");
+            items.put("role", "'" + role + "'");
         }
 
         final Boolean is_delete = (Boolean)payload.get("delete");
         if(is_delete != null)
-            params.put("delete_at", is_delete ? "current_timestamp()" : "null");
+            items.put("delete_at", is_delete ? "current_timestamp()" : "null");
 
-        if(params.size() != payload.size()) {
-            System.out.println(params.keySet());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        if(items.size() != payload.size())
+            return null;
 
-        int size = params.size();
+        return items;
+    }
+
+
+    private @NotNull String makeSQL(final Map<String, String> items, final long userId){
+
+        int size = items.size();
 
         StringBuilder sqlBuilder = new StringBuilder("update user set ");
 
-        for(String key : params.keySet()) {
+        for(String key : items.keySet()) {
 
-            String value =  (String)params.get(key);
+            String value =  items.get(key);
 
             size--;
 
@@ -122,9 +126,20 @@ public class UserController {
 
         sqlBuilder.append("where id=").append(userId);
 
-        final String sql = sqlBuilder.toString();
+        return sqlBuilder.toString();
+    }
 
-        System.out.println(sql);
+
+
+    @PatchMapping("/user/{userId}")
+    public ResponseEntity<?> patchUser(@PathVariable long userId, @RequestBody Map<String, Object> payload) {
+
+        final Map<String, String> items = this.payloadToSqlItems(payload);
+
+        if(items == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String sql = this.makeSQL(items, userId);
 
         int affectCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
@@ -135,7 +150,7 @@ public class UserController {
         else if(affectCount == 1)
             return new ResponseEntity<>(HttpStatus.OK);
         else {
-            System.out.println("unexcepted result: " + String.valueOf(affectCount));
+            Log.error("Unexcepted affect count: " + String.valueOf(affectCount));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

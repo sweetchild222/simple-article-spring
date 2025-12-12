@@ -10,32 +10,33 @@ public class DataBaseClientPool {
 
     private static DataBaseClientPool instance = null;
 
-
     private DataBaseClientPool(){
 
     }
 
     public static DataBaseClient getClient(final long userId){
 
-        if(instance == null) {
-
-            instance = new DataBaseClientPool();
-            for(int i = 0; i < instance.clientArray.length; ++i)
-                instance.clientArray[i]= new DataBaseClient();
-        }
+        if(instance == null)
+            instance = createInstance();
 
         return instance.clientArray[(int)(userId % (instance.clientCount - 1))];
     }
 
 
+    private static DataBaseClientPool createInstance(){
+
+        DataBaseClientPool clientPool = new DataBaseClientPool();
+        for(int i = 0; i < clientPool.clientArray.length; ++i)
+            clientPool.clientArray[i]= new DataBaseClient();
+
+        return clientPool;
+    }
+
+
     public static DataBaseClient getClient(){
 
-        if(instance == null) {
-
-            instance = new DataBaseClientPool();
-            for(int i = 0; i < instance.clientArray.length; ++i)
-                instance.clientArray[i]= new DataBaseClient();
-        }
+        if(instance == null)
+            instance = createInstance();
 
         return instance.clientArray[instance.clientCount - 1];
     }

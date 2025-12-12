@@ -33,7 +33,7 @@ public class MailService {
 
         } catch (MessagingException e) {
 
-            System.out.println(e.toString());
+            Log.error(e.toString());
             return null;
         }
     }
@@ -53,7 +53,7 @@ public class MailService {
 
         }catch (MailException e){
 
-            System.out.println(e.toString());
+            Log.error(e.toString());
             return false;
         }
     }

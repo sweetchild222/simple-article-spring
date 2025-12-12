@@ -26,7 +26,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if(map == null)
             return SecurityUser.createInvalidUser();
 
-
         if(map.isEmpty())
             return SecurityUser.createInvalidUser();
 

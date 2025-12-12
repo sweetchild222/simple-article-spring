@@ -1,5 +1,6 @@
 package net.inkuk.simple_article.database;
 
+import net.inkuk.simple_article.util.Log;
 import org.springframework.stereotype.Component;
 //import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -26,13 +27,11 @@ public class DataBaseClient {
             final String user = "simple_article_api";
             final String password = "apiSweetchild@0617";
 
-            System.out.println("try connect");
-
             return DriverManager.getConnection(url, user, password);
 
         } catch (ClassNotFoundException | SQLException e) {
 
-            System.out.println("connect: " + e.toString());
+            Log.error(e.toString());
             return null;
         }
     }
@@ -50,13 +49,15 @@ public class DataBaseClient {
             }
             catch(SQLException e){
 
-                System.out.println("close: " + e.toString());
+                Log.error(e.toString());
             }
         }
     }
 
 
     public Map<String, Object> getRow(String sql) {
+
+        Log.info(sql);
 
         try {
 
@@ -76,7 +77,7 @@ public class DataBaseClient {
             if(e instanceof SQLNonTransientConnectionException)
                 close();
 
-            System.out.println("getRow: " + e.toString());
+            Log.error(e.toString());
             return null;
         }
     }
@@ -84,6 +85,8 @@ public class DataBaseClient {
 
 
     public long postRow(String sql) {
+
+        Log.info(sql);
 
         try {
 
@@ -96,14 +99,10 @@ public class DataBaseClient {
         }
         catch (SQLException e) {
 
-            if(e instanceof SQLNonTransientConnectionException) {
-
+            if(e instanceof SQLNonTransientConnectionException)
                 close();
-                System.out.println("postRow: " + e.toString());
-            }
 
-            System.out.println("postRow: " + e.toString());
-
+            Log.error(e.toString());
             return -1;
         }
     }
@@ -111,20 +110,18 @@ public class DataBaseClient {
 
     public int updateRow(String sql) {
 
+        Log.info(sql);
+
         try {
 
             return executeUpdate(sql);
         }
         catch (SQLException e) {
 
-            if(e instanceof SQLNonTransientConnectionException) {
-
+            if(e instanceof SQLNonTransientConnectionException)
                 close();
-                System.out.println("updateRow: " + e.toString());
-            }
 
-            System.out.println("updateRow: " + e.toString());
-
+            Log.error(e.toString());
             return -1;
         }
     }
@@ -237,7 +234,7 @@ public class DataBaseClient {
                     break;
 
                 default:
-                    System.out.println(columnName + ": unsupported type " + String.valueOf(columnType));
+                    Log.error(String.valueOf(columnType) + ": Unsupported type " + columnName);
                     return null;
             }
         }

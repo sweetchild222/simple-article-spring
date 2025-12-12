@@ -1,6 +1,7 @@
 package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.database.DataBaseClientPool;
+import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.MailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,20 +35,10 @@ public class MailController {
         if(this.mail == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        try {
+        this.number = createNumber();
+        boolean success = mailService.sendMail(this.mail, this.number);
 
-            this.number = createNumber();
-            boolean success = mailService.sendMail(this.mail, this.number);
-
-            if(success)
-                return new ResponseEntity<>(HttpStatus.OK);
-            else
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        } catch (Exception e) {
-
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -75,7 +66,7 @@ public class MailController {
         else if(affectCount == 1)
             return new ResponseEntity<>(HttpStatus.OK);
         else {
-            System.out.println("unexcepted result: " + String.valueOf(affectCount));
+            Log.error("Unexcepted affect count: " + String.valueOf(affectCount));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

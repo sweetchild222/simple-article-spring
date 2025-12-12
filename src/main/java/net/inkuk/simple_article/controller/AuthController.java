@@ -3,6 +3,7 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.authorization.JwtUtil;
 import net.inkuk.simple_article.authorization.SecurityUser;
 import net.inkuk.simple_article.authorization.UserDetailsServiceImpl;
+import net.inkuk.simple_article.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,8 @@ public class AuthController {
             authenticationManager.authenticate(token);
 
         } catch (BadCredentialsException e) {
+
+            Log.error(e.toString());
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -52,7 +55,8 @@ public class AuthController {
 
         final String jwt = jwtUtil.generateToken(securityUser.getUsername());
 
-        return new ResponseEntity<>(Map.of("jwt", jwt, "user_id", securityUser.getID()), HttpStatus.OK);
+        final Map<String, Object> body = Map.of("jwt", jwt, "user_id", securityUser.getID());
 
+        return new ResponseEntity<>(body, HttpStatus.OK);
     }
 }

@@ -125,10 +125,8 @@ public class UserController {
             items.put("role", "'" + role + "'");
         }
 
-
         if(items.size() != payload.size())
             return null;
-
 
         return items;
     }

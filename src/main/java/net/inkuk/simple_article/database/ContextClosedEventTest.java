@@ -1,6 +1,5 @@
 package net.inkuk.simple_article.database;
 
-
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;

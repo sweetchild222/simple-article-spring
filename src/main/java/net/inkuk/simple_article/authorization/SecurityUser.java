@@ -39,7 +39,7 @@ public class SecurityUser implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
+    public @NotNull String getUsername() {
 
         return this.username;
     }

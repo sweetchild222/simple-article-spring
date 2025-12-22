@@ -44,7 +44,8 @@ public class DataBaseClientPool {
 
     public static void closeAll(){
 
-        for(DataBaseClient client : instance.clientArray)
-            client.close();
+        if(instance != null)
+            for(DataBaseClient client : instance.clientArray)
+                client.close();
     }
 }

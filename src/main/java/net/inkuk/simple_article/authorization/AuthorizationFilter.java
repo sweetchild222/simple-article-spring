@@ -36,9 +36,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String bearer = "Bearer ";
-        final String queryString = request.getQueryString();
-
-        Log.info(request.getMethod() + " " + request.getRequestURI() + (queryString != null ? queryString : ""));
 
         if(authHeader == null || !authHeader.startsWith(bearer)) {
             chain.doFilter(request, response);

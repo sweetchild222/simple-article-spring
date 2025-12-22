@@ -8,7 +8,7 @@ public class Log {
         StackTraceElement e = stacktrace[2];
         String methodName = e.getMethodName();
 
-        System.out.println("[INF] <" + methodName + "> (" + message + ")");
+        System.out.println("[INF] <" + methodName + "> " + message);
     }
 
 
@@ -18,7 +18,7 @@ public class Log {
         StackTraceElement e = stacktrace[2];
         String methodName = e.getMethodName();
 
-        System.out.println("[ERR] <" + methodName + "> (" + message + ")");
+        System.out.println("[ERR] <" + methodName + "> " + message);
     }
 
 
@@ -28,6 +28,6 @@ public class Log {
         StackTraceElement e = stacktrace[2];
         String methodName = e.getMethodName();
 
-        System.out.println("[DBG] <" + methodName + "> (" + message + ")");
+        System.out.println("[DBG] <" + methodName + "> " + message);
     }
 }

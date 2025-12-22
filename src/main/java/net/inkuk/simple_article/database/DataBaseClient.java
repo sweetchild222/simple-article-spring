@@ -61,16 +61,8 @@ public class DataBaseClient {
 
         try {
 
-            ResultSet resultSet = executeSelect(sql);
+            return executeSelect(sql);
 
-            if (resultSet == null)
-                return null;
-
-            Map<String, Object> map = convertMap(resultSet);
-
-            resultSet.close();
-
-            return map;
         }
         catch (SQLException e) {
 
@@ -90,12 +82,7 @@ public class DataBaseClient {
 
         try {
 
-            ResultSet resultSet = executeInsert(sql);
-
-            if (resultSet == null)
-                return -1;
-
-            return resultSet.first() ? resultSet.getLong(1) : -1;
+            return executeInsert(sql);
         }
         catch (SQLException e) {
 
@@ -127,7 +114,7 @@ public class DataBaseClient {
     }
 
 
-    private ResultSet executeSelect(String sql) throws SQLException {
+    private Map<String, Object> executeSelect(String sql) throws SQLException {
 
         if(this.connection != null)
             if(this.connection.isClosed())
@@ -146,11 +133,20 @@ public class DataBaseClient {
 
         statement.closeOnCompletion();
 
-        return statement.executeQuery(sql);
+        ResultSet resultSet =  statement.executeQuery(sql);
+
+        if (resultSet == null)
+            return null;
+
+        Map<String, Object> map = convertMap(resultSet);
+
+        resultSet.close();
+
+        return map;
     }
 
 
-    private ResultSet executeInsert(String sql) throws SQLException {
+    private long executeInsert(String sql) throws SQLException {
 
         if(this.connection != null)
             if(this.connection.isClosed())
@@ -160,19 +156,30 @@ public class DataBaseClient {
             this.connection = this.connect();
 
         if(this.connection == null)
-            return null;
+            return -1;
 
         Statement statement = this.connection.createStatement();
 
         if(statement == null)
-            return null;
+            return -1;
 
         statement.closeOnCompletion();
 
-        if(statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS) != 1)
-            return null;
+        int effectCount = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 
-        return statement.getGeneratedKeys();
+        if(effectCount == 0)
+            return 0;
+        else if(effectCount == 1) {
+
+            ResultSet resultSet = statement.getGeneratedKeys();
+
+            if (resultSet == null)
+                return -1;
+
+            return resultSet.first() ? resultSet.getLong(1) : -1;
+        }
+        else
+            return -1;
     }
 
 

@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 @RestController
 public class UserController {
@@ -57,6 +58,16 @@ public class UserController {
     }
 
 
+    private boolean validPassword(String password){
+
+        final String PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*()-+=]).{8,20}$";
+
+        final Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+
+        return pattern.matcher(password).matches();
+    }
+
+
     @PostMapping("/user")
     public ResponseEntity<?> postUser(@RequestBody Map<String, String> payload) {
 
@@ -67,17 +78,21 @@ public class UserController {
         if(username == null || password == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(password.length() < this.minPasswordLength || password.length() > maxPasswordLength)
+        if(!validPassword(password))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "insert into user (username, password) values (";
+        String sql = "insert into user (username, password) select ";
         sql += "'" + username + "', ";
-        sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "')";
+        sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "' ";
+        sql += "where not exists ";
+        sql += "(select 1 from user where username = '" + username + "')";
 
         long id = DataBaseClientPool.getClient().postRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(id == 0)
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         else
             return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
     }
@@ -102,7 +117,8 @@ public class UserController {
 
         final String password = (String)payload.get("password");
         if(password != null) {
-            if(password.length() < this.minPasswordLength || password.length() > this.maxPasswordLength)
+
+            if(!validPassword(password))
                 return null;
 
             if(payload.size() != 1)

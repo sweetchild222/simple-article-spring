@@ -7,8 +7,8 @@ import java.time.format.DateTimeFormatter;
 
 public class Log {
 
-    private static LogFile infoLogFile = new LogFile("info");
-    private static LogFile errorLogFile = new LogFile("error");
+    private static LogFile infoLogFile = new LogFile("log\\info");
+    private static LogFile errorLogFile = new LogFile("log\\error");
 
     public static void info(String message) {
 

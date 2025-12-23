@@ -56,8 +56,8 @@ public class LogFile {
 
         File file = new File(filePath);
 
-
         try {
+
             if (!file.exists())
                 if (!file.createNewFile())
                     return null;

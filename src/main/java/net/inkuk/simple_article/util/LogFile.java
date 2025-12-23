@@ -1,6 +1,7 @@
 package net.inkuk.simple_article.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,7 +50,7 @@ public class LogFile {
     }
 
 
-    private BufferedWriter createWriter(String fileName) {
+    private @Nullable BufferedWriter createWriter(String fileName) {
 
         final String filePath = this.path + "\\" + fileName;
 

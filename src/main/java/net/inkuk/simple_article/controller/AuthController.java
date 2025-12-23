@@ -4,6 +4,7 @@ import net.inkuk.simple_article.authorization.JwtUtil;
 import net.inkuk.simple_article.authorization.SecurityUser;
 import net.inkuk.simple_article.authorization.UserDetailsServiceImpl;
 import net.inkuk.simple_article.util.Log;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AuthController {
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> postAuthenticate(@RequestBody Map<String, String> requestBody){
+    public ResponseEntity<?> postAuthenticate(@RequestBody @NotNull Map<String, String> requestBody){
 
         final String username = requestBody.get("username");
         final String password = requestBody.get("password");

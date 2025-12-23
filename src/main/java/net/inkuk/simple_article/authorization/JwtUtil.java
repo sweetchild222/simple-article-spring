@@ -2,6 +2,7 @@ package net.inkuk.simple_article.authorization;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -40,7 +41,7 @@ public class JwtUtil {
     }
 
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(String token, @NotNull Function<Claims, T> claimsResolver) {
 
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -61,7 +62,7 @@ public class JwtUtil {
     }
 
 
-    private Boolean isTokenExpired(String token) {
+    private @NotNull Boolean isTokenExpired(String token) {
 
         return extractExpiration(token).before(new Date());
 

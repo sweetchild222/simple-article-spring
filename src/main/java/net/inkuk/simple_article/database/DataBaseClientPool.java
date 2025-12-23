@@ -1,6 +1,7 @@
 package net.inkuk.simple_article.database;
 
 import net.inkuk.simple_article.util.UserContext;
+import org.jetbrains.annotations.NotNull;
 
 public class DataBaseClientPool {
 
@@ -23,7 +24,7 @@ public class DataBaseClientPool {
     }
 
 
-    private static DataBaseClientPool createInstance(){
+    private static @NotNull DataBaseClientPool createInstance(){
 
         DataBaseClientPool clientPool = new DataBaseClientPool();
         for(int i = 0; i < clientPool.clientArray.length; ++i)

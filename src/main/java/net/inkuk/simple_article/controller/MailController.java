@@ -3,6 +3,7 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.MailService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class MailController {
     }
 
     @PostMapping("/mailVerify")
-    public ResponseEntity<?> postMailVerify(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> postMailVerify(@RequestBody @NotNull Map<String, String> payload) {
 
         this.mail = payload.get("mail");
 

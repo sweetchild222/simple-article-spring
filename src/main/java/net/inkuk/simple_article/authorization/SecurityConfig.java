@@ -1,5 +1,7 @@
 package net.inkuk.simple_article.authorization;
 
+import net.inkuk.simple_article.util.Log;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,7 +36,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(@NotNull HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -63,7 +65,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(@NotNull AuthenticationConfiguration authenticationConfiguration) throws Exception {
 
         return authenticationConfiguration.getAuthenticationManager();
     }

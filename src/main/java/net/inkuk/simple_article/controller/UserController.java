@@ -5,6 +5,7 @@ import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -79,7 +80,7 @@ public class UserController {
 
 
     @PostMapping("/user")
-    public ResponseEntity<?> postUser(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> postUser(@RequestBody @NotNull Map<String, String> payload) {
 
         final String username = payload.get("username");
         final String password = payload.get("password");
@@ -108,7 +109,7 @@ public class UserController {
     }
 
 
-    private Map<String, String> payloadToSqlItems(final Map<String, Object> payload){
+    private @Nullable Map<String, String> payloadToSqlItems(final Map<String, Object> payload){
 
         final Map<String, String> items = new java.util.HashMap<>(Map.of());
 
@@ -158,7 +159,7 @@ public class UserController {
     }
 
 
-    private @NotNull String makeSQL(final Map<String, String> items, final long userId){
+    private @NotNull String makeSQL(final @NotNull Map<String, String> items, final long userId){
 
         int size = items.size();
 

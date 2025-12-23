@@ -1,6 +1,7 @@
 package net.inkuk.simple_article.database;
 
 import net.inkuk.simple_article.util.Log;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 //import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -114,7 +115,7 @@ public class DataBaseClient {
     }
 
 
-    private Map<String, Object> executeSelect(String sql) throws SQLException {
+    private @Nullable Map<String, Object> executeSelect(String sql) throws SQLException {
 
         if(this.connection != null)
             if(this.connection.isClosed())
@@ -206,7 +207,7 @@ public class DataBaseClient {
     }
 
 
-    private Map<String, Object> convertMap(ResultSet resultSet) throws SQLException {
+    private @Nullable Map<String, Object> convertMap(ResultSet resultSet) throws SQLException {
 
         if(!resultSet.first())
             return new java.util.HashMap<>(Map.of());

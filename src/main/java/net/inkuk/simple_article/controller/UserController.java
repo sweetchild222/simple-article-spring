@@ -22,8 +22,6 @@ import java.util.regex.Pattern;
 @RestController
 public class UserController {
 
-    final int minPasswordLength = 8;
-    final int maxPasswordLength = 20;
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
@@ -109,7 +107,7 @@ public class UserController {
     }
 
 
-    private @Nullable Map<String, String> payloadToSqlItems(final Map<String, Object> payload){
+    private @Nullable Map<String, String> payloadToSqlItems(final @NotNull Map<String, Object> payload){
 
         final Map<String, String> items = new java.util.HashMap<>(Map.of());
 
@@ -184,6 +182,9 @@ public class UserController {
     @PatchMapping("/user/{userId}")
     public ResponseEntity<?> patchUser(@PathVariable long userId, @RequestBody Map<String, Object> payload) {
 
+        if(userId != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
         final Map<String, String> items = this.payloadToSqlItems(payload);
 
         if(items == null)
@@ -200,7 +201,7 @@ public class UserController {
         else if(affectCount == 1)
             return new ResponseEntity<>(HttpStatus.OK);
         else {
-            Log.error("Unexcepted affect count: " + String.valueOf(affectCount));
+            Log.error("Unexcepted affect count: " + affectCount);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

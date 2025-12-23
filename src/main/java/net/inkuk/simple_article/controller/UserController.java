@@ -60,11 +60,21 @@ public class UserController {
 
     private boolean validPassword(String password){
 
-        final String PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*()-+=]).{8,20}$";
+        final String reg = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*()-+=]).{8,20}$";
 
-        final Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+        final Pattern pattern = Pattern.compile(reg);
 
         return pattern.matcher(password).matches();
+    }
+
+
+    private boolean validUsername(String username){
+
+        final String reg = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+
+        final Pattern pattern = Pattern.compile(reg, Pattern.CASE_INSENSITIVE);
+
+        return pattern.matcher(username).matches();
     }
 
 
@@ -78,7 +88,7 @@ public class UserController {
         if(username == null || password == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!validPassword(password))
+        if(!(validPassword(password) && validUsername(username)))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "insert into user (username, password) select ";

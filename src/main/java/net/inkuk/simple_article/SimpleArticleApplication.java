@@ -3,6 +3,7 @@ package net.inkuk.simple_article;
 
 import jakarta.annotation.PostConstruct;
 import net.inkuk.simple_article.database.DataBaseClientPool;
+import net.inkuk.simple_article.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -28,6 +29,8 @@ public class SimpleArticleApplication implements ApplicationRunner {
 	public static void main(String[] args) {
 
         SpringApplication.run(SimpleArticleApplication.class, args);
+
+        Log.info("asdfsa");
 
         //appContext.getBean()
 

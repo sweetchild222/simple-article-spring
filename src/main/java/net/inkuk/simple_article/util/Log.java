@@ -1,5 +1,7 @@
 package net.inkuk.simple_article.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -24,7 +26,7 @@ public class Log {
     }
 
 
-    private static String currentTimeString(){
+    private static @NotNull String currentTimeString(){
 
         LocalDateTime now = LocalDateTime.now();
 

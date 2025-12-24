@@ -26,6 +26,18 @@ public class Log {
     }
 
 
+    public static void info(long message) {
+
+        info(String.valueOf(message));
+    }
+
+
+    public static void info(int message) {
+
+        info(String.valueOf(message));
+    }
+
+
     private static @NotNull String currentTimeString(){
 
         LocalDateTime now = LocalDateTime.now();
@@ -51,6 +63,17 @@ public class Log {
         errorLogFile.write("[" + time + "] " + log);
     }
 
+    public static void error(long message) {
+
+        error(String.valueOf(message));
+    }
+
+
+    public static void error(int message) {
+
+        error(String.valueOf(message));
+    }
+
 
     public static void debug(String message) {
 
@@ -61,6 +84,18 @@ public class Log {
         final String log = "[DBG] <" + methodName + "> " + message;
 
         System.out.println(log);
+    }
+
+
+    public static void debug(long message) {
+
+        debug(String.valueOf(message));
+    }
+
+
+    public static void debug(int message) {
+
+        debug(String.valueOf(message));
     }
 
 

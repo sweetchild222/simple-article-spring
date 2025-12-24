@@ -29,9 +29,9 @@ public class MultipartFileToFile {
     }
 
 
-    private static String createFolder(String type){
+    private static String createFolder(String path){
 
-        final String path = rootPath + "\\" + type;
+        //final String path = rootPath + "\\" + subPath;
 
         Path directoryPath = Paths.get(path);
 
@@ -50,24 +50,20 @@ public class MultipartFileToFile {
     }
 
 
-    public static String save(String type, MultipartFile multipartFile) {
+    public static String save(String path, MultipartFile multipartFile, String format) {
 
         try {
 
-            String path = createFolder(type);
+            String absolutePath = createFolder(path);
 
-            if(path == null)
+            if(absolutePath == null)
                 return null;
 
-            String fileName = generateFileName();
+            final String fileName = generateFileName() + "." + format;
 
-            String fullPath = path + "\\" + fileName;
-
-            Log.debug(fullPath);
+            String fullPath = absolutePath + "\\" + fileName;
 
             File file = new File(fullPath);
-
-            Log.debug(file.getAbsolutePath());
 
             multipartFile.transferTo(file);
 

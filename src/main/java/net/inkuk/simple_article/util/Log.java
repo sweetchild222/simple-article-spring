@@ -38,6 +38,12 @@ public class Log {
     }
 
 
+    public static void info(boolean message) {
+
+        info(String.valueOf(message));
+    }
+
+
     private static @NotNull String currentTimeString(){
 
         LocalDateTime now = LocalDateTime.now();
@@ -75,6 +81,12 @@ public class Log {
     }
 
 
+    public static void error(boolean message) {
+
+        error(String.valueOf(message));
+    }
+
+
     public static void debug(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
@@ -97,6 +109,13 @@ public class Log {
 
         debug(String.valueOf(message));
     }
+
+
+    public static void debug(boolean message) {
+
+        debug(String.valueOf(message));
+    }
+
 
 
     public static void close(){

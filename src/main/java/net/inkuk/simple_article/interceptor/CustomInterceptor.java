@@ -19,7 +19,7 @@ public class CustomInterceptor implements HandlerInterceptor {
         final String queryString = request.getQueryString();
 
         String sessionId = request.getSession().getId();
-        String url = request.getMethod() + " " + request.getRequestURI() + (queryString != null ? queryString : "");
+        String url = request.getMethod() + " " + request.getRequestURI() + "?" + (queryString != null ? queryString : "");
         Log.info(url + " {" + sessionId + "}");
 
         return true;

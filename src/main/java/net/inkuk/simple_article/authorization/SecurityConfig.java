@@ -47,7 +47,6 @@ public class SecurityConfig {
                         .requestMatchers("/mailVerify/**").permitAll()
                         .requestMatchers("/user/exist/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                        //.requestMatchers("/welcome").hasRole("ADMIN")
                         .anyRequest().authenticated()
         );
 

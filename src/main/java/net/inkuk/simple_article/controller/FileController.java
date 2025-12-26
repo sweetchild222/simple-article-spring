@@ -40,6 +40,8 @@ import java.awt.Dimension;
 @RestController
 public class FileController {
 
+    private static final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
+
     private static final String profilePath = "file\\profile";
 
     @PostMapping("/file/profile")
@@ -59,10 +61,10 @@ public class FileController {
 
             int orientation = getOrientation(new ByteArrayInputStream(bytes));
 
-            final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
+
             //final int[][] sizeList = {{50, 50}, {100, 100}, {200, 200}, {300, 300}, {500, 500}};
 
-            final BufferedImage [] newImages = ImageResize.resize(srcImage, orientation, sizeList);
+            final BufferedImage [] newImages = ImageResize.resize(srcImage, orientation, this.sizeList);
 
             if(newImages == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -95,15 +97,9 @@ public class FileController {
 
         final String id = generateID();
 
-        boolean isFirst = true;
-
-        String representFileName = id + ".png";
-
         for(BufferedImage image : images) {
 
-            final String fileName = isFirst ? representFileName : (id + "_" + image.getWidth() + "x" + image.getHeight() + ".png");
-
-            isFirst = false;
+            final String fileName = id + "_" + image.getWidth() + "x" + image.getHeight() + ".png";
 
             final String filePath = path + "\\" + fileName;
 
@@ -121,7 +117,7 @@ public class FileController {
             }
         }
 
-        return representFileName;
+        return id + ".png";
     }
 
 
@@ -174,28 +170,97 @@ public class FileController {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-        return now.format(formatter) + "-" + uuid.toString();
+        return now.format(formatter) + "-" + uuid;
+    }
+
+
+    private String [] spiltFileName(String fileName){
+
+        int index = fileName.lastIndexOf('.');
+
+        if (index > 0 && index < fileName.length() - 1) {
+
+            String name = fileName.substring(0, index);
+            String extension = fileName.substring(index + 1);
+
+            return new String[]{name, extension};
+
+        } else
+            return null;
+    }
+
+
+    private int [] parseIntSize(String size){
+
+        String [] split = size.split("x");
+
+        if(split.length == 2){
+
+            try {
+
+                int width = Integer.parseInt(split[0]);
+                int height = Integer.parseInt(split[1]);
+
+                return new int [] {width, height};
+
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+
+    public boolean isSupportSize(String stringSize){
+
+        int [] sizeInt = parseIntSize(stringSize);
+
+        if(sizeInt == null)
+            return false;
+
+        for(int [] size: sizeList){
+
+            if(sizeInt[0] == size[0] && sizeInt[1] == size[1])
+                return true;
+        }
+
+        return false;
     }
 
 
     @GetMapping("/file/profile/{id}")
-    public ResponseEntity<?> getProfile(@PathVariable String id) {
+    public ResponseEntity<?> getProfile(@PathVariable String id, @RequestParam(required=false) String size) {
+
+        String [] split = spiltFileName(id);
+
+        if(split == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!(split.length == 2 && split[1].equals("png")))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(size == null) //set default size
+            size = sizeList[0][0] + "x" + sizeList[0][1];
+
+        if(!isSupportSize(size))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final Path currentPath = Path.of("").toAbsolutePath();
 
-        final String filePath = currentPath.toString() + "\\" + profilePath + "\\" + id;
+        final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
+
+        final String filePath = currentPath + "\\" + profilePath + "\\" + fileName;
 
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        final String urlPath = "file:" + filePath;
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
         try {
 
-            final UrlResource resource = new UrlResource(urlPath);
+            final UrlResource resource = new UrlResource("file:" + filePath);
 
             return new ResponseEntity<>(resource, headers, HttpStatus.OK);
 

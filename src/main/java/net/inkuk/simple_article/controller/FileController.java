@@ -1,6 +1,5 @@
 package net.inkuk.simple_article.controller;
 
-import ch.qos.logback.core.joran.sanity.Pair;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -9,8 +8,6 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import net.inkuk.simple_article.util.ImageResize;
 import net.inkuk.simple_article.util.Log;
-import net.inkuk.simple_article.util.MultipartFileToFile;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,12 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ch.qos.logback.core.joran.sanity.Pair;
+
 import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -35,12 +29,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
-import java.awt.Dimension;
 
 @RestController
 public class FileController {
 
-    private static final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
+    private static final int[][] supportSizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
 
     private static final String profilePath = "file\\profile";
 
@@ -61,15 +54,12 @@ public class FileController {
 
             int orientation = getOrientation(new ByteArrayInputStream(bytes));
 
-
-            //final int[][] sizeList = {{50, 50}, {100, 100}, {200, 200}, {300, 300}, {500, 500}};
-
-            final BufferedImage [] newImages = ImageResize.resize(srcImage, orientation, this.sizeList);
+            final BufferedImage [] newImages = ImageResize.resize(srcImage, orientation, supportSizeList);
 
             if(newImages == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-            if(newImages.length != sizeList.length)
+            if(newImages.length != supportSizeList.length)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
             final String id = imagesToFiles(newImages);
@@ -142,8 +132,6 @@ public class FileController {
 
 
     private static String createFolder(){
-
-        //final String path = rootPath + "\\" + subPath;
 
         Path directoryPath = Paths.get(profilePath);
 
@@ -219,7 +207,7 @@ public class FileController {
         if(sizeInt == null)
             return false;
 
-        for(int [] size: sizeList){
+        for(int [] size: supportSizeList){
 
             if(sizeInt[0] == size[0] && sizeInt[1] == size[1])
                 return true;
@@ -241,7 +229,7 @@ public class FileController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(size == null) //set default size
-            size = sizeList[0][0] + "x" + sizeList[0][1];
+            size = supportSizeList[0][0] + "x" + supportSizeList[0][1];
 
         if(!isSupportSize(size))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

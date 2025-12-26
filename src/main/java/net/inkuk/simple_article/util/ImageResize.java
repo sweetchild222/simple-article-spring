@@ -83,18 +83,18 @@ public class ImageResize {
 
         final BufferedImage newImage;
 
-        if (orientation == 6 || orientation == 8 || orientation == 5 || orientation == 7)
+        if (orientation == 5 || orientation == 6 || orientation == 7 || orientation == 8)
             newImage = new BufferedImage(srcImage.getHeight(), srcImage.getWidth(), srcImage.getType());
-        else if (orientation == 3 || orientation == 2 || orientation == 4)
+        else if (orientation == 2 || orientation == 3 || orientation == 4)
             newImage = new BufferedImage(srcImage.getWidth(), srcImage.getHeight(), srcImage.getType());
         else    // orientation == 1
             return srcImage;
 
         final Graphics2D graphics = (Graphics2D) newImage.getGraphics();
 
-        if(orientation == 3 || orientation == 6 || orientation == 8 || orientation == 5 || orientation == 7) {
+        if(orientation == 3 || orientation == 5 || orientation == 6 || orientation == 7 || orientation == 8) {
 
-            final int radians = (Map.of(5, 270, 6, 90, 3, 180, 7, 270, 8, 270)).getOrDefault(orientation, 0);
+            final int radians = (Map.of(3, 180, 5, 270, 6, 90, 7, 270, 8, 270)).getOrDefault(orientation, 0);
 
             graphics.rotate(Math.toRadians(radians), (double)newImage.getWidth() / 2, (double)newImage.getHeight() / 2);
             graphics.translate((newImage.getWidth() - srcImage.getWidth()) / 2, (newImage.getHeight() - srcImage.getHeight()) / 2);

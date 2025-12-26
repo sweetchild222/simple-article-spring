@@ -1,15 +1,17 @@
 package net.inkuk.simple_article.util;
 
+import ch.qos.logback.core.joran.sanity.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class ImageResize {
 
-    public static @NotNull BufferedImage scale(BufferedImage srcImage, int targetWidth, int targetHeight){
+    public static @NotNull BufferedImage scaleToFit(BufferedImage srcImage, int targetWidth, int targetHeight){
 
         final float widthRatio = (float) targetWidth / srcImage.getWidth();
         final float heightRatio = (float) targetHeight / srcImage.getHeight();
@@ -43,44 +45,68 @@ public class ImageResize {
     }
 
 
+    public static BufferedImage [] resize(BufferedImage srcImage, int orientation, int[][] sizeList) {
 
-
-    public static BufferedImage resize(BufferedImage srcImage, int orientation, int targetWidth, int targetHeight) {
-
-        BufferedImage rotatedImage = rotate(srcImage, orientation);
+        final BufferedImage rotatedImage = rotate(srcImage, orientation);
 
         if(rotatedImage == null)
             return null;
 
-        if(rotatedImage.getWidth() == targetWidth && rotatedImage.getHeight() == targetHeight)
-            return srcImage;
+        BufferedImage curImage = rotatedImage;
 
-        final BufferedImage scaledImage = scale(rotatedImage, targetWidth, targetHeight);
+        final ArrayList<BufferedImage> list = new ArrayList<>();
 
-        return crop(scaledImage, targetWidth, targetHeight);
+        for(int [] size: sizeList) {
+
+            final int targetWidth = size[0];
+            final int targetHeight = size[1];
+
+            if (curImage.getWidth() == targetWidth && curImage.getHeight() == targetHeight) {
+                list.add(curImage);
+            }
+            else {
+
+                final BufferedImage scaledImage = scaleToFit(curImage, targetWidth, targetHeight);
+
+                curImage = crop(scaledImage, targetWidth, targetHeight);
+
+                list.add(curImage);
+            }
+        }
+
+        return list.toArray(BufferedImage[]::new);
+
     }
 
 
     private static BufferedImage rotate(BufferedImage srcImage, int orientation) {
 
-        final int radians = (Map.of(1, 0, 6, 90, 3, 180, 8, 270)).getOrDefault(orientation, -1);
+        final BufferedImage newImage;
 
-        BufferedImage newImage;
-
-        if (radians == 90 || radians == 270)
+        if (orientation == 6 || orientation == 8 || orientation == 5 || orientation == 7)
             newImage = new BufferedImage(srcImage.getHeight(), srcImage.getWidth(), srcImage.getType());
-        else if (radians == 180)
+        else if (orientation == 3 || orientation == 2 || orientation == 4)
             newImage = new BufferedImage(srcImage.getWidth(), srcImage.getHeight(), srcImage.getType());
-        else if(radians == 0)
+        else    // orientation == 1
             return srcImage;
-        else
-            return null;
 
-        Graphics2D graphics = (Graphics2D) newImage.getGraphics();
+        final Graphics2D graphics = (Graphics2D) newImage.getGraphics();
 
-        graphics.rotate(Math.toRadians(radians), (double)newImage.getWidth() / 2, (double)newImage.getHeight() / 2);
-        graphics.translate((newImage.getWidth() - srcImage.getWidth()) / 2, (newImage.getHeight() - srcImage.getHeight()) / 2);
-        graphics.drawRenderedImage(srcImage, null);
+        if(orientation == 3 || orientation == 6 || orientation == 8 || orientation == 5 || orientation == 7) {
+
+            final int radians = (Map.of(5, 270, 6, 90, 3, 180, 7, 270, 8, 270)).getOrDefault(orientation, 0);
+
+            graphics.rotate(Math.toRadians(radians), (double)newImage.getWidth() / 2, (double)newImage.getHeight() / 2);
+            graphics.translate((newImage.getWidth() - srcImage.getWidth()) / 2, (newImage.getHeight() - srcImage.getHeight()) / 2);
+        }
+
+
+        if(orientation == 3 || orientation == 6 || orientation == 8)
+            graphics.drawRenderedImage(srcImage, null);
+        else if(orientation == 2 || orientation == 5)
+            graphics.drawImage(srcImage, srcImage.getWidth(), 0, 0, srcImage.getHeight(), 0, 0, srcImage.getWidth(), srcImage.getHeight(), null);
+        else //if(orientation == 4 || orientation == 7)
+            graphics.drawImage(srcImage, 0, srcImage.getHeight(), srcImage.getWidth(), 0, 0, 0, srcImage.getWidth(), srcImage.getHeight(), null);
 
         return newImage;
     }

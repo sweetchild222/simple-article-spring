@@ -1,11 +1,14 @@
 package net.inkuk.simple_article;
 
 import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import jakarta.annotation.PostConstruct;
 import net.inkuk.simple_article.database.DataBaseClientPool;
+import net.inkuk.simple_article.util.ImageResize;
 import net.inkuk.simple_article.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +26,18 @@ import javax.xml.transform.Result;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootApplication
 @EnableScheduling
@@ -66,125 +77,107 @@ public class SimpleArticleApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // Read image and EXIF metadata
-        File inputFile = new File("D:\\abc.jpg");
-
-        BufferedImage image = ImageIO.read(inputFile);
-
-        //BufferedImage outImage =  rotateClockwise90(image);
-
-        //File outputFile = new File("D:\\output90.jpg");
-
-        //ImageIO.write(outImage, "jpg", outputFile);
-
-        //BufferedImage outImage2 =  rotateClockwise180(image);
-
-        BufferedImage outImage2 = rotateImage(image, 180);
-
-        File outputFile2 = new File("D:\\output180.jpg");
-
-        ImageIO.write(outImage2, "jpg", outputFile2);
 
 
-        BufferedImage outImage3 = rotateImage(image, 270);
+        for (int i = 1; i < 9; i++) {
 
-        File outputFile1 = new File("D:\\output270.jpg");
+            File file = new File("D:\\image\\" + String.valueOf(i) + ".jpg");
 
-        ImageIO.write(outImage3, "jpg", outputFile1);
+            byte[] bytes = Files.readAllBytes(file.toPath());
 
+            int orientation = getOrientation(new ByteArrayInputStream(bytes));
 
-        BufferedImage outImage4 = rotateImage(image, 90);
+            Log.debug(orientation);
 
-        File outputFile4 = new File("D:\\output90.jpg");
+            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
 
-        ImageIO.write(outImage4, "jpg", outputFile4);
+            final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
 
+            final BufferedImage[] newImages = ImageResize.resize(srcImage, orientation, sizeList);
 
-        BufferedImage outImage5 = rotateImage(image, 0);
+            if (newImages != null)
+                writeImages(newImages, orientation);
 
-        File outputFile5 = new File("D:\\output0.jpg");
+        }
+    }
 
-        ImageIO.write(outImage5, "jpg", outputFile5);
+    private static String generateID(){
 
+        UUID uuid = UUID.randomUUID();
 
+        LocalDateTime now = LocalDateTime.now();
 
-        //ImageIO.read(inputFile);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-
-        //Metadata metadata = ImageMetadataReader.re(inputFile);
-
-        //Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-
-        //int a = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-
-        //Log.debug(a);
-
-
-
-
-
-
-
+        return now.format(formatter) + "-" + uuid.toString();
     }
 
 
-    public static BufferedImage rotateClockwise90(BufferedImage src) {
 
-        final int width = src.getWidth();
-        final int height = src.getHeight();
+    public String writeImages(BufferedImage [] images, int orientation) {
 
-        BufferedImage rotated = new BufferedImage(height, width, src.getType());
+        String path = "D:\\image";
 
-        Graphics2D graphics2D = rotated.createGraphics();
-
-        Log.debug((height - width) / 2);
-        graphics2D.translate((height - width) / 2, (height - width) / 2);
-        graphics2D.rotate(Math.toRadians(90), (double) height / 2, (double) width / 2);
-        graphics2D.drawRenderedImage(src, null);
-
-        return rotated;
-    }
-
-
-    public static BufferedImage rotateClockwise180(BufferedImage src) {
-
-        final int width = src.getWidth();
-        final int height = src.getHeight();
-
-        BufferedImage rotated = new BufferedImage(width, height, src.getType());
-
-        Graphics2D graphics2D = rotated.createGraphics();
-
-        Log.debug((height - width) / 2);
-        graphics2D.translate((height) / 2, -(height) / 2);
-        graphics2D.rotate(Math.toRadians(180), 0, 0);
-        graphics2D.drawRenderedImage(src, null);
-
-        return rotated;
-    }
-
-
-    private BufferedImage rotateImage(BufferedImage srcImage, int radians) {
-
-        BufferedImage newImage;
-
-        if (radians == 90 || radians == 270)
-            newImage = new BufferedImage(srcImage.getHeight(), srcImage.getWidth(), srcImage.getType());
-        else if (radians == 180)
-            newImage = new BufferedImage(srcImage.getWidth(), srcImage.getHeight(), srcImage.getType());
-        else if(radians == 0)
-            return srcImage;
-        else
+        if(path == null)
             return null;
 
-        Graphics2D graphics = (Graphics2D) newImage.getGraphics();
+        final String id = "";
 
-        graphics.rotate(Math.toRadians(radians), (double)newImage.getWidth() / 2, (double)newImage.getHeight() / 2);
-        graphics.translate((newImage.getWidth() - srcImage.getWidth()) / 2, (newImage.getHeight() - srcImage.getHeight()) / 2);
-        graphics.drawRenderedImage(srcImage, null);
+        boolean isFirst = true;
 
-        return newImage;
+        String representFileName = String.valueOf(orientation) + "_" + id + ".png";
+
+        for(BufferedImage image : images) {
+
+            final String fileName = isFirst ? representFileName : (String.valueOf(orientation) + "_" + id + "_" + image.getWidth() + "x" + image.getHeight() + ".png");
+
+            isFirst = false;
+
+            final String filePath = path + "\\" + fileName;
+
+            if(!writeImage(image, filePath))
+                return null;
+        }
+
+        return representFileName;
     }
+
+
+    private boolean writeImage(BufferedImage image, String filePath){
+
+        try {
+
+            return ImageIO.write(image, "PNG", new File(filePath));
+        }
+        catch (IOException e){
+
+            Log.debug(filePath);
+            return false;
+        }
+    }
+
+
+
+
+    public int getOrientation(ByteArrayInputStream stream) {
+
+        try {
+
+            Metadata metadata = ImageMetadataReader.readMetadata(stream);
+            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+
+            if(directory == null)
+                return 1; //== 0 degree
+
+            return directory.getInt(ExifIFD0Directory. TAG_ORIENTATION);
+
+        } catch (ImageProcessingException | IOException | MetadataException e) {
+
+            Log.error(e.toString());
+            return 1; // 0 degree
+        }
+    }
+
 
 
 

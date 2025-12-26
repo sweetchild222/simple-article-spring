@@ -1,5 +1,6 @@
 package net.inkuk.simple_article.controller;
 
+import ch.qos.logback.core.joran.sanity.Pair;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -17,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import ch.qos.logback.core.joran.sanity.Pair;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -34,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
+import java.awt.Dimension;
 
 @RestController
 public class FileController {
@@ -50,16 +52,25 @@ public class FileController {
 
             final byte [] bytes = multipartFile.getBytes();
 
-            int orientation = getOrientation(new ByteArrayInputStream(bytes));
-
             final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
 
-            final BufferedImage newImage = ImageResize.resize(srcImage, orientation, 500, 500);
+            if(srcImage == null)
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-            if(newImage == null)
+            int orientation = getOrientation(new ByteArrayInputStream(bytes));
+
+            final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
+            //final int[][] sizeList = {{50, 50}, {100, 100}, {200, 200}, {300, 300}, {500, 500}};
+
+            final BufferedImage [] newImages = ImageResize.resize(srcImage, orientation, sizeList);
+
+            if(newImages == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-            final String id = writeImage(newImage);
+            if(newImages.length != sizeList.length)
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+            final String id = imagesToFiles(newImages);
 
             if(id == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -75,31 +86,42 @@ public class FileController {
     }
 
 
-    private String writeImage(BufferedImage image) {
+    private String imagesToFiles(BufferedImage [] images) {
 
         String path = createFolder();
 
         if(path == null)
             return null;
 
-        String id = generateID() + ".png";
+        final String id = generateID();
 
-        String filePath = path + "\\" + id;
+        boolean isFirst = true;
 
-        try {
+        String representFileName = id + ".png";
 
-            boolean success = ImageIO.write(image, "PNG", new File(filePath));
+        for(BufferedImage image : images) {
 
-            if(!success)
+            final String fileName = isFirst ? representFileName : (id + "_" + image.getWidth() + "x" + image.getHeight() + ".png");
+
+            isFirst = false;
+
+            final String filePath = path + "\\" + fileName;
+
+            try {
+
+                boolean success = ImageIO.write(image, "PNG", new File(filePath));
+
+                if(!success)
+                    return null;
+            }
+            catch (IOException e){
+
+                Log.debug(filePath);
                 return null;
-
-            return id;
+            }
         }
-        catch (IOException e){
 
-            Log.debug(filePath);
-            return null;
-        }
+        return representFileName;
     }
 
 

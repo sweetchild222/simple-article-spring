@@ -1,8 +1,15 @@
 package net.inkuk.simple_article.controller;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import net.inkuk.simple_article.util.ImageResize;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.MultipartFileToFile;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,7 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -35,21 +46,22 @@ public class FileController {
         if(multipartFile.getSize() > (1000 * 1000 * 10))
             return new ResponseEntity<>(HttpStatus.CONTENT_TOO_LARGE);
 
-        String path = createFolder();
-        if(path == null)
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        String id = generateID() + "." + format;
-
-        String filePath = path + "\\" + id;
-
-        Log.debug(filePath);
-
         try {
 
-            boolean success = cropImageToFile(ImageIO.read(multipartFile.getInputStream()), filePath, 500, 500);
+            final byte [] bytes = multipartFile.getBytes();
 
-            if(!success)
+            int orientation = getOrientation(new ByteArrayInputStream(bytes));
+
+            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
+
+            final BufferedImage newImage = ImageResize.resize(srcImage, orientation, 500, 500);
+
+            if(newImage == null)
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+            final String id = writeImage(newImage);
+
+            if(id == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
             return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
@@ -63,29 +75,52 @@ public class FileController {
     }
 
 
-    public static boolean cropImageToFile(BufferedImage image, String filePath, int width, int height) {
+    private String writeImage(BufferedImage image) {
+
+        String path = createFolder();
+
+        if(path == null)
+            return null;
+
+        String id = generateID() + ".png";
+
+        String filePath = path + "\\" + id;
 
         try {
-            if (image.getWidth() == width && image.getHeight() == height) {
 
-                Log.debug("xxxxx");
-                return ImageIO.write(image, "PNG", new File(filePath));
-            }
-            else {
+            boolean success = ImageIO.write(image, "PNG", new File(filePath));
 
-                BufferedImage croppedImage = ImageResize.resizeAndCrop(image, width, height);
+            if(!success)
+                return null;
 
-                return ImageIO.write(croppedImage, "PNG", new File(filePath));
-            }
-        } catch (IOException e) {
+            return id;
+        }
+        catch (IOException e){
 
-            Log.error(e.toString());
-
-            return false;
+            Log.debug(filePath);
+            return null;
         }
     }
 
 
+    public int getOrientation(ByteArrayInputStream stream) {
+
+        try {
+
+            Metadata metadata = ImageMetadataReader.readMetadata(stream);
+            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+
+            if(directory == null)
+                return 1; //== 0 degree
+
+            return directory.getInt(ExifIFD0Directory. TAG_ORIENTATION);
+
+        } catch (ImageProcessingException | IOException | MetadataException e) {
+
+            Log.error(e.toString());
+            return 1; // 0 degree
+        }
+    }
 
 
     private static String createFolder(){

@@ -1,57 +1,87 @@
 package net.inkuk.simple_article.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 
 public class ImageResize {
 
-    public static BufferedImage resize(BufferedImage image, int targetWidth, int targetHeight){
+    public static @NotNull BufferedImage scale(BufferedImage srcImage, int targetWidth, int targetHeight){
 
-        final float widthRatio = (float) targetWidth / image.getWidth();
-        final float heightRatio = (float) targetHeight / image.getHeight();
+        final float widthRatio = (float) targetWidth / srcImage.getWidth();
+        final float heightRatio = (float) targetHeight / srcImage.getHeight();
 
-        final float scale = Math.max(widthRatio, heightRatio);
+        int scaledWidth = widthRatio >= heightRatio ? targetWidth : (int) (srcImage.getWidth() * heightRatio);
+        int scaledHeight = widthRatio <= heightRatio ? targetHeight : (int) (srcImage.getHeight() * widthRatio);
 
-        final int scaledWidth = (int) (image.getWidth() * scale);
-        final int scaledHeight = (int) (image.getHeight() * scale);
+        final Image scaledImage = srcImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+        final BufferedImage newImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
 
-        final Image scaledImage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-        final BufferedImage bufferedScaledImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
-
-        final Graphics2D g2d = bufferedScaledImage.createGraphics();
+        final Graphics2D g2d = newImage.createGraphics();
         g2d.drawImage(scaledImage, 0, 0, null);
         g2d.dispose();
 
-        return bufferedScaledImage;
+        return newImage;
     }
 
 
-    public static BufferedImage resizeAndCrop(BufferedImage image, int targetWidth, int targetHeight) {
+    public static @NotNull BufferedImage crop(BufferedImage srcImage, int targetWidth, int targetHeight) {
 
-        BufferedImage scaledImage = resize(image, targetWidth, targetHeight);
+        final int srcWidth = srcImage.getWidth();
+        final int srcHeight = srcImage.getHeight();
 
-        final int scaledWidth = scaledImage.getWidth();
+        final int cropX = Math.max(0, (srcWidth - targetWidth) / 2);
+        final int cropY = Math.max(0, (srcHeight - targetHeight) / 2);
 
-        final int scaledHeight = scaledImage.getHeight();
+        final int finalWidth = Math.min(targetWidth, srcWidth - cropX);
+        final int finalHeight = Math.min(targetHeight, srcHeight - cropY);
 
-        Log.debug(targetWidth);
-        Log.debug(targetHeight);
+        return srcImage.getSubimage(cropX, cropY, finalWidth, finalHeight);
+    }
 
-        Log.debug("sdfs");
-        Log.debug(scaledWidth);
-        Log.debug(scaledHeight);
 
-        final int cropX = Math.max(0, (scaledWidth - targetWidth) / 2);
-        final int cropY = Math.max(0, (scaledHeight - targetHeight) / 2);
 
-        final int finalWidth = Math.min(targetWidth, scaledWidth - cropX);
-        final int finalHeight = Math.min(targetHeight, scaledHeight - cropY);
 
-        Log.debug(cropY);
-        Log.debug(cropX);
-        Log.debug(finalWidth);
-        Log.debug(finalHeight);
+    public static BufferedImage resize(BufferedImage srcImage, int orientation, int targetWidth, int targetHeight) {
 
-        return scaledImage.getSubimage(cropX, cropY, finalWidth, finalHeight);
+        BufferedImage rotatedImage = rotate(srcImage, orientation);
+
+        if(rotatedImage == null)
+            return null;
+
+        if(rotatedImage.getWidth() == targetWidth && rotatedImage.getHeight() == targetHeight)
+            return srcImage;
+
+        final BufferedImage scaledImage = scale(rotatedImage, targetWidth, targetHeight);
+
+        return crop(scaledImage, targetWidth, targetHeight);
+    }
+
+
+    private static BufferedImage rotate(BufferedImage srcImage, int orientation) {
+
+        final int radians = (Map.of(1, 0, 6, 90, 3, 180, 8, 270)).getOrDefault(orientation, -1);
+
+        BufferedImage newImage;
+
+        if (radians == 90 || radians == 270)
+            newImage = new BufferedImage(srcImage.getHeight(), srcImage.getWidth(), srcImage.getType());
+        else if (radians == 180)
+            newImage = new BufferedImage(srcImage.getWidth(), srcImage.getHeight(), srcImage.getType());
+        else if(radians == 0)
+            return srcImage;
+        else
+            return null;
+
+        Graphics2D graphics = (Graphics2D) newImage.getGraphics();
+
+        graphics.rotate(Math.toRadians(radians), (double)newImage.getWidth() / 2, (double)newImage.getHeight() / 2);
+        graphics.translate((newImage.getWidth() - srcImage.getWidth()) / 2, (newImage.getHeight() - srcImage.getHeight()) / 2);
+        graphics.drawRenderedImage(srcImage, null);
+
+        return newImage;
     }
 }

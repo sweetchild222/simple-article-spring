@@ -21,7 +21,7 @@ public class Log {
         final String green = "\u001B[32m";
         final String reset = "\u001B[0m";
 
-        System.out.println(green + "[IF]" + reset + " " + log);
+        System.out.println(green + "[INF]" + reset + " " + log);
 
         String time = currentTimeString();
 

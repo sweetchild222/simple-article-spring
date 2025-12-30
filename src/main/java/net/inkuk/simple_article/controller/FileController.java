@@ -7,6 +7,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import net.inkuk.simple_article.util.ImageResize;
+import net.inkuk.simple_article.util.ImageSetWriter;
 import net.inkuk.simple_article.util.Log;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,8 +39,10 @@ public class FileController {
 
     private static final String profilePath = "file/profile";
 
+    private final ImageSetWriter imageSetWriter = new ImageSetWriter(profilePath);
+
     @PostMapping("/file/profile")
-    public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile, @RequestParam("image-format") String format){
+    public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile){
 
         if(multipartFile.getSize() > (1000 * 1000 * 10))
             return new ResponseEntity<>(HttpStatus.CONTENT_TOO_LARGE);
@@ -54,15 +58,15 @@ public class FileController {
 
             int orientation = getOrientation(new ByteArrayInputStream(bytes));
 
-            final BufferedImage [] newImages = ImageResize.resize(srcImage, orientation, supportSizeList);
+            final BufferedImage [] imageSet = ImageResize.resize(srcImage, orientation, supportSizeList);
 
-            if(newImages == null)
+            if(imageSet == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-            if(newImages.length != supportSizeList.length)
+            if(imageSet.length != supportSizeList.length)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-            final String id = imagesToFiles(newImages);
+            final String id = imageSetWriter.write(imageSet);
 
             if(id == null)
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -71,43 +75,10 @@ public class FileController {
         }
         catch (IOException e){
 
-            Log.debug(e.toString());
+            Log.error(e.toString());
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    }
-
-
-    private String imagesToFiles(BufferedImage [] images) {
-
-        String path = createFolder();
-
-        if(path == null)
-            return null;
-
-        final String id = generateID();
-
-        for(BufferedImage image : images) {
-
-            final String fileName = id + "_" + image.getWidth() + "x" + image.getHeight() + ".png";
-
-            final String filePath = path + "/" + fileName;
-
-            try {
-
-                boolean success = ImageIO.write(image, "PNG", new File(filePath));
-
-                if(!success)
-                    return null;
-            }
-            catch (IOException e){
-
-                Log.debug(filePath);
-                return null;
-            }
-        }
-
-        return id + ".png";
     }
 
 
@@ -126,39 +97,8 @@ public class FileController {
         } catch (ImageProcessingException | IOException | MetadataException e) {
 
             Log.error(e.toString());
-            return 1; // 0 degree
+            return 1; //== 0 degree
         }
-    }
-
-
-    private static String createFolder(){
-
-        Path directoryPath = Paths.get(profilePath);
-
-        try {
-
-            if(!Files.exists(directoryPath))
-                Files.createDirectories(directoryPath);
-
-            return directoryPath.toAbsolutePath().toString();
-
-        }catch(IOException e) {
-
-            System.out.println(e.toString());
-            return null;
-        }
-    }
-
-
-    private static String generateID(){
-
-        UUID uuid = UUID.randomUUID();
-
-        LocalDateTime now = LocalDateTime.now();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-
-        return now.format(formatter) + "-" + uuid;
     }
 
 
@@ -254,7 +194,7 @@ public class FileController {
 
         } catch (MalformedURLException e) {
 
-            Log.debug(e.toString());
+            Log.error(e.toString());
 
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

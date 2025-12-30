@@ -35,7 +35,7 @@ public class FileController {
 
     private static final int[][] supportSizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
 
-    private static final String profilePath = "file\\profile";
+    private static final String profilePath = "file/profile";
 
     @PostMapping("/file/profile")
     public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile, @RequestParam("image-format") String format){
@@ -91,7 +91,7 @@ public class FileController {
 
             final String fileName = id + "_" + image.getWidth() + "x" + image.getHeight() + ".png";
 
-            final String filePath = path + "\\" + fileName;
+            final String filePath = path + "/" + fileName;
 
             try {
 
@@ -238,7 +238,7 @@ public class FileController {
 
         final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
 
-        final String filePath = currentPath + "\\" + profilePath + "\\" + fileName;
+        final String filePath = currentPath + "/" + profilePath + "/" + fileName;
 
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

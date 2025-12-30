@@ -52,7 +52,7 @@ public class LogFile {
 
     private @Nullable BufferedWriter createWriter(String fileName) {
 
-        final String filePath = this.path + "\\" + fileName;
+        final String filePath = this.path + "/" + fileName;
 
         File file = new File(filePath);
 

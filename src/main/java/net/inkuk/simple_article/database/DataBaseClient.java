@@ -43,8 +43,6 @@ public class DataBaseClient {
         if(this.connection != null) {
 
             try {
-
-                System.out.println("close connect");
                 this.connection.close();
                 this.connection = null;
             }

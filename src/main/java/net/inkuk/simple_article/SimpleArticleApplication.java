@@ -79,26 +79,26 @@ public class SimpleArticleApplication implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
 
 
-        for (int i = 1; i < 9; i++) {
-
-            File file = new File("D:\\image\\" + String.valueOf(i) + ".jpg");
-
-            byte[] bytes = Files.readAllBytes(file.toPath());
-
-            int orientation = getOrientation(new ByteArrayInputStream(bytes));
-
-            Log.debug(orientation);
-
-            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
-
-            final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
-
-            final BufferedImage[] newImages = ImageResize.resize(srcImage, orientation, sizeList);
-
-            if (newImages != null)
-                writeImages(newImages, orientation);
-
-        }
+//        for (int i = 1; i < 9; i++) {
+//
+//            File file = new File("D:\\image\\" + String.valueOf(i) + ".jpg");
+//
+//            byte[] bytes = Files.readAllBytes(file.toPath());
+//
+//            int orientation = getOrientation(new ByteArrayInputStream(bytes));
+//
+//            Log.debug(orientation);
+//
+//            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
+//
+//            final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
+//
+//            final BufferedImage[] newImages = ImageResize.resize(srcImage, orientation, sizeList);
+//
+//            if (newImages != null)
+//                writeImages(newImages, orientation);
+//
+//        }
     }
 
     private static String generateID(){

@@ -18,7 +18,10 @@ public class Log {
 
         final String log = "<" + methodName + "> " + message;
 
-        System.out.println("[INF] " + log);
+        final String green = "\u001B[32m";
+        final String reset = "\u001B[0m";
+
+        System.out.println(green + "[INF]" + reset + " " + log);
 
         String time = currentTimeString();
 
@@ -62,7 +65,10 @@ public class Log {
 
         final String log = "<" + methodName + "> " + message;
 
-        System.out.println("[ERR] " + log);
+        final String red = "\u001B[31m";
+        final String reset = "\u001B[0m";
+
+        System.out.println(red + "[ERR]" + reset + " " + log);
 
         String time = currentTimeString();
 
@@ -93,7 +99,10 @@ public class Log {
         final StackTraceElement e = stacktrace[2];
         final String methodName = e.getMethodName();
 
-        final String log = "[DBG] <" + methodName + "> " + message;
+        final String cyan = "\u001B[36m";
+        final String reset = "\u001B[0m";
+
+        final String log = cyan + "[DBG]" + reset + " <" + methodName + "> " + message;
 
         System.out.println(log);
     }

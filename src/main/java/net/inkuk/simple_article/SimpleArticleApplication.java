@@ -50,6 +50,8 @@ public class SimpleArticleApplication implements ApplicationRunner {
         SpringApplication.run(SimpleArticleApplication.class, args);
 
         Log.info("asdfsa");
+        Log.error("asdfsa");
+        Log.debug("ddd");
 
         //appContext.getBean()
 

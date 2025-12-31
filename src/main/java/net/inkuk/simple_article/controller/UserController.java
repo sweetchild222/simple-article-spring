@@ -107,19 +107,20 @@ public class UserController {
     }
 
 
-    private @Nullable Map<String, String> payloadToSqlItems(final @NotNull Map<String, Object> payload){
+    private @Nullable Map<String, Object> payloadToSqlItems(final @NotNull Map<String, Object> payload){
 
-        final Map<String, String> items = new java.util.HashMap<>(Map.of());
+        final Map<String, Object> items = new java.util.HashMap<>(Map.of());
 
-        final Boolean is_delete = (Boolean)payload.get("delete");
-        if(is_delete != null) {
-            if(!(is_delete && payload.size() == 1))
+        final Boolean is_withdraw = (Boolean)payload.get("withdraw");
+        if(is_withdraw != null) {
+            if(!(is_withdraw && payload.size() == 1))
                 return null;
 
-            items.put("delete_at", "current_timestamp()");
+            items.put("withdraw_at", "current_timestamp()");
             items.put("username", "null");
             items.put("profile", "null");
             items.put("password", "null");
+            items.put("verified", 0);
 
             return items;
         }
@@ -157,7 +158,7 @@ public class UserController {
     }
 
 
-    private @NotNull String makeSQL(final @NotNull Map<String, String> items, final long userId){
+    private @NotNull String makeSQL(final @NotNull Map<String, Object> items, final long userId){
 
         int size = items.size();
 
@@ -165,11 +166,13 @@ public class UserController {
 
         for(String key : items.keySet()) {
 
-            String value =  items.get(key);
+            Object value =  items.get(key);
 
             size--;
 
-            sqlBuilder.append(key).append("=").append(value).append(size == 0 ? " " : ", ");
+            sqlBuilder.append(key).append("=");
+            sqlBuilder.append(value.toString());
+            sqlBuilder.append(size == 0 ? " " : ", ");
         }
 
         sqlBuilder.append("where id=").append(userId);
@@ -185,7 +188,10 @@ public class UserController {
         if(userId != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final Map<String, String> items = this.payloadToSqlItems(payload);
+        if(payload.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final Map<String, Object> items = this.payloadToSqlItems(payload);
 
         if(items == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

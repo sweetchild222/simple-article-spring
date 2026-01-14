@@ -21,7 +21,7 @@ public class Log {
         final String green = "\u001B[32m";
         final String reset = "\u001B[0m";
 
-        System.out.println(green + "[INF]" + reset + " " + log);
+        System.out.println(green + "[INF]" + " " + log);
 
         String time = currentTimeString();
 
@@ -68,7 +68,7 @@ public class Log {
         final String red = "\u001B[31m";
         final String reset = "\u001B[0m";
 
-        System.out.println(red + "[ERR]" + reset + " " + log);
+        System.out.println(red + "[ERR]" + " " + log);
 
         String time = currentTimeString();
 
@@ -99,10 +99,10 @@ public class Log {
         final StackTraceElement e = stacktrace[2];
         final String methodName = e.getMethodName();
 
-        final String cyan = "\u001B[36m";
+        final String cyan = "\u001B[93m";
         final String reset = "\u001B[0m";
 
-        final String log = cyan + "[DBG]" + reset + " <" + methodName + "> " + message;
+        final String log = cyan + "[DBG]" +  " <" + methodName + "> " + message;
 
         System.out.println(log);
     }

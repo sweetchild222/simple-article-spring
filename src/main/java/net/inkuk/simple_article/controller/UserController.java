@@ -107,9 +107,9 @@ public class UserController {
     }
 
 
-    private @Nullable Map<String, Object> payloadToSqlItems(final @NotNull Map<String, Object> payload){
+    private @Nullable Map<String, String> payloadToSqlItems(final @NotNull Map<String, Object> payload){
 
-        final Map<String, Object> items = new java.util.HashMap<>(Map.of());
+        final Map<String, String> items = new java.util.HashMap<>(Map.of());
 
         final Boolean is_withdraw = (Boolean)payload.get("withdraw");
         if(is_withdraw != null) {
@@ -120,7 +120,7 @@ public class UserController {
             items.put("username", "null");
             items.put("profile", "null");
             items.put("password", "null");
-            items.put("verified", 0);
+            items.put("verified", "0");
 
             return items;
         }
@@ -158,7 +158,7 @@ public class UserController {
     }
 
 
-    private @NotNull String makeSQL(final @NotNull Map<String, Object> items, final long userId){
+    private @NotNull String makeSQL(final @NotNull Map<String, String> items, final long userId){
 
         int size = items.size();
 
@@ -166,12 +166,12 @@ public class UserController {
 
         for(String key : items.keySet()) {
 
-            Object value =  items.get(key);
+            String value =  items.get(key);
 
             size--;
 
             sqlBuilder.append(key).append("=");
-            sqlBuilder.append(value.toString());
+            sqlBuilder.append(value);
             sqlBuilder.append(size == 0 ? " " : ", ");
         }
 
@@ -191,7 +191,7 @@ public class UserController {
         if(payload.isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final Map<String, Object> items = this.payloadToSqlItems(payload);
+        final Map<String, String> items = this.payloadToSqlItems(payload);
 
         if(items == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -24,10 +24,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
         if(map == null)
-            return SecurityUser.createInvalidUser();
+            return SecurityUser.createInvalid();
 
         if(map.isEmpty())
-            return SecurityUser.createInvalidUser();
+            return SecurityUser.createEmpty();
 
         final long id = (long)map.get("id");
         final String name = (String)map.get("username");

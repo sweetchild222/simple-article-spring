@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,21 +39,16 @@ public class AuthController {
         if(username == null || password == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        try {
-
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-            authenticationManager.authenticate(token);
-
-        } catch (BadCredentialsException e) {
-
-            Log.error(e.toString());
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
         final SecurityUser securityUser = (SecurityUser)userDetailsServiceImpl.loadUserByUsername(username);
 
         if(securityUser.isInvalid())
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(securityUser.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!(new BCryptPasswordEncoder()).matches(password, securityUser.getPassword()))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         final String jwt = jwtUtil.generateToken(securityUser.getUsername());
 

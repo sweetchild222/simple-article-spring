@@ -27,9 +27,15 @@ public class SecurityUser implements UserDetails {
     }
 
 
-    public static SecurityUser createInvalidUser(){
+    public static SecurityUser createInvalid(){
 
         return new SecurityUser(-1, null, null, false, null);
+    }
+
+
+    public static SecurityUser createEmpty(){
+
+        return new SecurityUser(0, null, null, false, null);
     }
 
 
@@ -49,6 +55,13 @@ public class SecurityUser implements UserDetails {
 
         return (this.id == -1);
     }
+
+
+    public boolean isEmpty(){
+
+        return (this.id == 0);
+    }
+
 
     @Override
     public String getPassword() {

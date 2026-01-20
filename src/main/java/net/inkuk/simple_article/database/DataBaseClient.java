@@ -7,13 +7,16 @@ import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
-@Component
 public class DataBaseClient {
 
     private Connection connection = null;
 
-    public Connection connect(){
+    private Timer timer = null;
+
+    private Connection connect(){
 
         try {
 
@@ -38,7 +41,52 @@ public class DataBaseClient {
     }
 
 
+    private void startPing(){
+
+        if(this.timer != null)
+            return;
+
+        this.timer = new Timer();
+        this.timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+
+                if (connection == null)
+                    return;
+
+                try {
+
+                    Statement statement = connection.createStatement();
+
+                    if (statement == null)
+                        return;
+
+                    statement.closeOnCompletion();
+
+                    ResultSet resultSet = statement.executeQuery("select 1");
+
+                    //Log.debug("ping");
+
+                } catch (SQLException e) {
+
+                    if(e instanceof SQLNonTransientConnectionException)
+                        close();
+
+                    Log.error(e.toString());
+                }
+            }
+        }, 20000, 20000);
+    }
+
+
+
     public void close() {
+
+        if(this.timer != null) {
+            this.timer.cancel();
+            this.timer = null;
+        }
+
 
         if(this.connection != null) {
 
@@ -115,17 +163,12 @@ public class DataBaseClient {
 
     private @Nullable Map<String, Object> executeSelect(String sql) throws SQLException {
 
-        if(this.connection != null)
-            if(this.connection.isClosed())
-                this.connection = null;
+        Connection connection = getConnection();
 
-        if(this.connection == null)
-            this.connection = this.connect();
-
-        if(this.connection == null)
+        if(connection == null)
             return null;
 
-        Statement statement = this.connection.createStatement();
+        Statement statement = connection.createStatement();
 
         if(statement == null)
             return null;
@@ -133,9 +176,6 @@ public class DataBaseClient {
         statement.closeOnCompletion();
 
         ResultSet resultSet =  statement.executeQuery(sql);
-
-        if (resultSet == null)
-            return null;
 
         Map<String, Object> map = convertMap(resultSet);
 
@@ -147,17 +187,12 @@ public class DataBaseClient {
 
     private long executeInsert(String sql) throws SQLException {
 
-        if(this.connection != null)
-            if(this.connection.isClosed())
-                this.connection = null;
+        Connection connection = getConnection();
 
-        if(this.connection == null)
-            this.connection = this.connect();
-
-        if(this.connection == null)
+        if(connection == null)
             return -1;
 
-        Statement statement = this.connection.createStatement();
+        Statement statement = connection.createStatement();
 
         if(statement == null)
             return -1;
@@ -182,19 +217,38 @@ public class DataBaseClient {
     }
 
 
+    private Connection getConnection(){
+
+        try {
+            if (this.connection != null)
+                if (this.connection.isClosed())
+                    this.connection = null;
+
+            if (this.connection == null) {
+                this.connection = this.connect();
+                if (this.connection != null)
+                    startPing();
+            }
+
+            return this.connection;
+
+        } catch (SQLException e) {
+
+            Log.error(e.toString());
+            return null;
+
+        }
+    }
+
+
     private int executeUpdate(String sql) throws SQLException {
 
-        if(this.connection != null)
-            if(this.connection.isClosed())
-                this.connection = null;
+        Connection connection = getConnection();
 
-        if(this.connection == null)
-            this.connection = this.connect();
-
-        if(this.connection == null)
+        if(connection == null)
             return -1;
 
-        Statement statement = this.connection.createStatement();
+        Statement statement = connection.createStatement();
 
         if(statement == null)
             return -1;

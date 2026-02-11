@@ -83,6 +83,7 @@ public class JwtUtil {
 
     private String createToken(Map<String, Object> claims, String subject) {
 
+        //final int expirationSecond = 60 * 60;
         final int expirationSecond = 60 * 60;
 
         return Jwts.builder().claims(claims).subject(subject).issuedAt(new Date(System.currentTimeMillis()))

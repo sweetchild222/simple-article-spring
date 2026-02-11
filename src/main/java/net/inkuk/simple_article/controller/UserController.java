@@ -120,7 +120,6 @@ public class UserController {
             items.put("username", "null");
             items.put("profile", "null");
             items.put("password", "null");
-            items.put("verified", "0");
 
             return items;
         }
@@ -178,6 +177,33 @@ public class UserController {
         sqlBuilder.append("where id=").append(userId);
 
         return sqlBuilder.toString();
+    }
+
+
+
+    @GetMapping("/user/{userId}/password/{password}")
+    public ResponseEntity<?> getVerifyEmail(@PathVariable long userId, @PathVariable String password) {
+
+        if(userId != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        final String sql = "select password from user where id=" + String.valueOf(userId);
+
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+
+        if(map == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(map.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        final String passwordSource = map.get("password").toString();
+
+
+
+        boolean match = (new BCryptPasswordEncoder()).matches(password, passwordSource);
+
+        return new ResponseEntity<>(Map.of("correct", match), HttpStatus.OK);
     }
 
 

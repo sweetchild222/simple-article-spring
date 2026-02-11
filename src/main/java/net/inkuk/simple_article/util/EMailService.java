@@ -2,22 +2,21 @@ package net.inkuk.simple_article.util;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MailService {
+public class EMailService {
 
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "sweetchild22.ik@gmail.com";
 
-    public MailService(JavaMailSender javaMailSender){
+    public EMailService(JavaMailSender javaMailSender){
         this.javaMailSender = javaMailSender;
     }
 
-    public MimeMessage createMail(String mail, long number) {
+    private MimeMessage createEMail(String email, long number) {
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -28,7 +27,7 @@ public class MailService {
             body += "<h3>" + "감사합니다." + "</h3>";
 
             message.setFrom(senderEmail);
-            message.setRecipients(MimeMessage.RecipientType.TO, mail);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("이메일 인증");
             message.setText(body,"UTF-8", "html");
 
@@ -41,9 +40,9 @@ public class MailService {
         }
     }
 
-    public boolean sendMail(String mail, long number) {
+    public boolean sendEMail(String email, long number) {
 
-        MimeMessage message = createMail(mail, number);
+        MimeMessage message = createEMail(email, number);
 
         if(message == null)
             return false;

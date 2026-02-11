@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public @NotNull UserDetails loadUserByUsername(@NotNull String username) {
 
-        final String sql = "select id, username, password, verified, role from user where username = '" + username + "'";
+        final String sql = "select id, username, password, role from user where username = '" + username + "'";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
@@ -33,11 +33,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final String name = (String)map.get("username");
         final String password = (String)map.get("password");
         final String authority = (String)map.get("authority");
-        final boolean verified = ((int)map.get("verified") != 0);
 
         final List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + authority));
 
-        return new SecurityUser(id, name, password, verified, authorities);
+        return new SecurityUser(id, name, password, authorities);
 
     }
 }

@@ -18,30 +18,24 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
-public class FileController {
+public class BlobController {
 
-    private static final int[][] supportSizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
+    private static final int[][] supportSizeList = {{256, 256}, {128, 128}, {64, 64}, {32, 32}};
 
-    private static final String profilePath = "file/profile";
+    private static final String profilePath = "blob/profile";
 
     private final ImageSetWriter imageSetWriter = new ImageSetWriter(profilePath);
 
-    @PostMapping("/file/profile")
+    @PostMapping("/blob/profile")
     public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile){
 
         if(multipartFile.getSize() > (1000 * 1000 * 10))
@@ -157,7 +151,7 @@ public class FileController {
     }
 
 
-    @GetMapping("/file/profile/{id}")
+    @GetMapping("/blob/profile/{id}")
     public ResponseEntity<?> getProfile(@PathVariable String id, @RequestParam(required=false) String size) {
 
         String [] split = spiltFileName(id);

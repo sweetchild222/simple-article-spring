@@ -2,7 +2,7 @@ package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
-import net.inkuk.simple_article.util.MailService;
+import net.inkuk.simple_article.util.EMailService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,62 +13,44 @@ import java.util.Map;
 @RestController
 public class MailController {
 
-    private final MailService mailService;
-    private long number = -1;
-    private String mail = null;
+    private final EMailService emailService;
+    private long code = -1;
+    private String email = null;
 
-    public MailController(MailService mailService) {
+    public MailController(EMailService emailService) {
 
-        this.mailService = mailService;
+        this.emailService = emailService;
     }
 
 
-    public long createNumber() {
+    public long createCode() {
 
         return (long)(Math.random() * (90000)) + 100000; //(long) Math.random() * (최댓값-최소값+1) + 최소값
     }
 
-    @PostMapping("/mailVerify")
-    public ResponseEntity<?> postMailVerify(@RequestBody @NotNull Map<String, String> payload) {
+    @PostMapping("/verifyEmail")
+    public ResponseEntity<?> postVerifyEmail(@RequestBody @NotNull Map<String, String> payload) {
 
-        this.mail = payload.get("mail");
+        this.email = payload.get("email");
 
-        if(this.mail == null)
+        if(this.email == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        this.number = createNumber();
-        boolean success = mailService.sendMail(this.mail, this.number);
+        this.code = createCode();
+        boolean success = this.emailService.sendEMail(this.email, this.code);
 
         return new ResponseEntity<>(success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
-    @PatchMapping("/mailVerify/{mail}")
-    public ResponseEntity<?> patchMailVerify(@PathVariable String mail, @RequestBody Map<String, Long> payload) {
+    @GetMapping("/verifyEmail/{mail}/{code}")
+    public ResponseEntity<?> getVerifyEmail(@PathVariable String mail, @PathVariable long code) {
 
-        if(this.mail == null || this.number == -1)
+        if(this.email == null || this.code == -1)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final long number = payload.get("number");
+        boolean isMatch = this.email.equals(mail) && (this.code == code);
 
-        boolean isMatch = this.mail.equals(mail) && (this.number == number);
-
-        if(!isMatch)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        final String sql = "update user set verified = 1 where username = '" + mail + "'";
-
-        final int affectCount = DataBaseClientPool.getClient().updateRow(sql);
-
-        if(affectCount == -1)
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        else if(affectCount == 0)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else if(affectCount == 1)
-            return new ResponseEntity<>(HttpStatus.OK);
-        else {
-            Log.error("Unexcepted affect count: " + String.valueOf(affectCount));
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
     }
 }

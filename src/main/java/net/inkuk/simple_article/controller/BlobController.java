@@ -9,6 +9,7 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import net.inkuk.simple_article.util.ImageResize;
 import net.inkuk.simple_article.util.ImageSetWriter;
 import net.inkuk.simple_article.util.Log;
+import net.inkuk.simple_article.util.MultipartToFile;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,9 +32,25 @@ public class BlobController {
 
     private static final int[][] supportSizeList = {{256, 256}, {128, 128}, {64, 64}, {32, 32}};
 
-    private static final String profilePath = "blob/profile";
-
+    private static final String profilePath = "/home/ubuntu/simple/blob/profile";
     private final ImageSetWriter imageSetWriter = new ImageSetWriter(profilePath);
+
+    private static final String articlePath = "/home/ubuntu/simple/blob/article";
+    private final MultipartToFile multipartToFile = new MultipartToFile(articlePath);
+
+    @PostMapping("/blob/article")
+    public ResponseEntity<?> postArticle(@RequestParam("image") MultipartFile multipartFile) {
+
+        if(multipartFile.getSize() > (1000 * 1000 * 10))
+            return new ResponseEntity<>(HttpStatus.CONTENT_TOO_LARGE);
+
+        final String id = multipartToFile.write(multipartFile);
+
+        if(id == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
+    }
 
     @PostMapping("/blob/profile")
     public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile){
@@ -168,11 +185,9 @@ public class BlobController {
         if(!isSupportSize(size))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final Path currentPath = Path.of("").toAbsolutePath();
-
         final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
 
-        final String filePath = currentPath + "/" + profilePath + "/" + fileName;
+        final String filePath = profilePath + "/" + fileName;
 
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -161,6 +161,25 @@ public class DataBaseClient {
     }
 
 
+    public int deleteRow(String sql) {
+
+        Log.info(sql);
+
+        try {
+
+            return executeUpdate(sql);
+        }
+        catch (SQLException e) {
+
+            if(e instanceof SQLNonTransientConnectionException)
+                close();
+
+            Log.error(e.toString());
+            return -1;
+        }
+    }
+
+
     private @Nullable Map<String, Object> executeSelect(String sql) throws SQLException {
 
         Connection connection = getConnection();

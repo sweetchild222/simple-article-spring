@@ -207,7 +207,6 @@ public class UserController {
     }
 
 
-
     @PatchMapping("/user/{userId}")
     public ResponseEntity<?> patchUser(@PathVariable long userId, @RequestBody Map<String, Object> payload) {
 

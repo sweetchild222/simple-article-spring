@@ -3,13 +3,12 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.ObjectCovert;
+import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public class ArticleController {
         sql += "where exists " + "(select 1 from category where id=" +  strCategoryId + ") ";
         sql += "and exists (select 1 from user where id=" + strUserId + ")";
 
-        long id = DataBaseClientPool.getClient().postRow(sql);
+        long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -48,5 +47,62 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         else
             return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/article/{articleId}")
+    public ResponseEntity<?> getArticle(@PathVariable long articleId) {
+
+        String sql = "select * from article where id=" + String.valueOf(articleId);
+
+        final Map<String, Object> map = DataBaseClientPool.getClient(UserContext.userID()).getRow(sql);
+
+        if(map == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(map.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Number userId = ObjectCovert.asNumber(map.get("user_id"));
+        Number open = ObjectCovert.asNumber(map.get("open"));
+
+        if(userId == null || open == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(open.longValue() == 0 && (userId.longValue() != UserContext.userID()))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/article/{articleId}")
+    public ResponseEntity<?> deleteArticle(@PathVariable long articleId) {
+
+        final String sql = "delete from article where id=" + articleId + " and user_id=" + UserContext.userID();
+
+        int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
+
+        if (affectCount == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if (affectCount == 0)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else if (affectCount == 1)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else {
+            Log.error("Unexcepted affect count: " + affectCount);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PutMapping("/article/{articleId}")
+    public ResponseEntity<?> putArticle(@RequestBody @NotNull Map<String, Object> payload) {
+
+
+
+
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

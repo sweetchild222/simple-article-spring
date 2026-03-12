@@ -8,14 +8,44 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
+
 
 @RestController
 public class MailController {
 
+    public static class CodeAt{
+
+        private final Date at;
+        private final long code;
+
+        public CodeAt(long code) {
+
+            this.at = new Date();
+            this.code = code;
+        }
+
+        public boolean isMatch(long code){
+
+            return (this.code == code);
+        }
+
+        public boolean isExpired(){
+
+            Date now = new Date();
+
+            long span = now.getTime() - this.at.getTime();
+
+            Log.debug("span" + span);
+
+            return (span > 1000 * 60 * 60);
+        }
+    }
+
+
+    private final Map<String, CodeAt> hashCodeAt = new HashMap<String, CodeAt>();
     private final EMailService emailService;
-    private long code = -1;
-    private String email = null;
 
     public MailController(EMailService emailService) {
 
@@ -31,13 +61,18 @@ public class MailController {
     @PostMapping("/verifyEmail")
     public ResponseEntity<?> postVerifyEmail(@RequestBody @NotNull Map<String, String> payload) {
 
-        this.email = payload.get("email");
+        String email = payload.get("email");
 
-        if(this.email == null)
+        if(email == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        this.code = createCode();
-        boolean success = this.emailService.sendEMail(this.email, this.code);
+        long code = createCode();
+        boolean success = this.emailService.sendEMail(email, code);
+
+        if(success) {
+            this.hashCodeAt.remove(email);
+            this.hashCodeAt.put(email, new CodeAt(code));
+        }
 
         return new ResponseEntity<>(success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -46,10 +81,17 @@ public class MailController {
     @GetMapping("/verifyEmail/{mail}/{code}")
     public ResponseEntity<?> getVerifyEmail(@PathVariable String mail, @PathVariable long code) {
 
-        if(this.email == null || this.code == -1)
+        this.hashCodeAt.values().removeIf(entry -> entry.isExpired());
+
+        CodeAt codeAt = this.hashCodeAt.get(mail);
+
+        if(codeAt == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        boolean isMatch = this.email.equals(mail) && (this.code == code);
+        boolean isMatch = codeAt.isMatch(code);
+
+        if(isMatch)
+            this.hashCodeAt.remove(mail);
 
         return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
     }

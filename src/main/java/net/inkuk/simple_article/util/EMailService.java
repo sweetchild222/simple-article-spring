@@ -24,6 +24,7 @@ public class EMailService {
 
             String body = "<h3>" + "요청하신 인증 번호입니다." + "</h3>";
             body += "<h1>" + number + "</h1>";
+            body += "<h3>" + "인증 번호 유효 기간은 1시간 입니다." + "</h3>";
             body += "<h3>" + "감사합니다." + "</h3>";
 
             message.setFrom(senderEmail);

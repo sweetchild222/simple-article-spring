@@ -44,6 +44,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/authenticate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
                         .requestMatchers("/verifyEmail/**").permitAll()
                         .requestMatchers("/user/exist/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()

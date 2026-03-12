@@ -1,5 +1,6 @@
 package net.inkuk.simple_article.authorization;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.jetbrains.annotations.NotNull;
@@ -41,9 +42,13 @@ public class JwtUtil {
     }
 
 
-    public <T> T extractClaim(String token, @NotNull Function<Claims, T> claimsResolver) {
+    private <T> T extractClaim(String token, @NotNull Function<Claims, T> claimsResolver) {
 
         final Claims claims = extractAllClaims(token);
+
+        if(claims == null)
+            return null;
+
         return claimsResolver.apply(claims);
     }
 
@@ -52,20 +57,34 @@ public class JwtUtil {
 
         final Claims claims = extractAllClaims(token);
 
+        if(claims == null)
+            return -1;
+
         return (int)claims.get("id");
     }
 
 
     public Claims extractAllClaims(String token) {
 
-        return Jwts.parser().verifyWith(this.getSigningKey()).build().parseSignedClaims(token).getPayload();
+        try {
+
+            return Jwts.parser().verifyWith(this.getSigningKey()).build().parseSignedClaims(token).getPayload();
+
+        } catch (JwtException e) {
+
+            return null;
+        }
     }
 
 
     private @NotNull Boolean isTokenExpired(String token) {
 
-        return extractExpiration(token).before(new Date());
+        Date date = extractExpiration(token);
 
+        if(date == null)
+            return true;
+
+        return date.before(new Date());
     }
 
 

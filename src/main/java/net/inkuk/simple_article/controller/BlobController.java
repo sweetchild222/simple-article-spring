@@ -208,4 +208,30 @@ public class BlobController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    @GetMapping("/blob/article/{id}")
+    public ResponseEntity<?> getArticle(@PathVariable String id) {
+
+        final String filePath = articlePath + "/" + id;
+
+        if(!(new File(filePath)).exists())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        try {
+
+            final UrlResource resource = new UrlResource("file:" + filePath);
+
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+
+        } catch (MalformedURLException e) {
+
+            Log.error(e.toString());
+
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

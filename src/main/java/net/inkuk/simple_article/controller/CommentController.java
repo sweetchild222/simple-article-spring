@@ -13,4 +13,30 @@ import java.util.Map;
 
 @RestController
 public class CommentController {
+
+    @GetMapping("/comment/{commentId}")
+    public ResponseEntity<?> getArticle(@PathVariable long commentId) {
+
+        String sql = "select * from comment where id=" + String.valueOf(commentId);
+
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+
+        if(map == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(map.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Number userId = ObjectCovert.asNumber(map.get("user_id"));
+        Number open = ObjectCovert.asNumber(map.get("open"));
+
+        if(userId == null || open == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(open.longValue() == 0 && (userId.longValue() != UserContext.userID()))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
 }

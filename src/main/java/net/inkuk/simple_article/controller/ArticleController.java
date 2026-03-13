@@ -21,7 +21,7 @@ public class ArticleController {
 
         String sql = "select * from article where id=" + String.valueOf(articleId);
 
-        final Map<String, Object> map = DataBaseClientPool.getClient(UserContext.userID()).getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
         if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -140,7 +140,4 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
 }

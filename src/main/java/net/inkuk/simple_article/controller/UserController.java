@@ -28,7 +28,7 @@ public class UserController {
 
         final String sql = "select username, profile, create_at from user where id = " + String.valueOf(userId);
 
-        final Map<String, Object> map = DataBaseClientPool.getClient(UserContext.userID()).getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
         if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

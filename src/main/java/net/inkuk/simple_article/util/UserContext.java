@@ -9,16 +9,22 @@ public class UserContext {
 
     public static long userID(){
 
-        SecurityUser securityUser = (SecurityUser) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+        Object object = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 
-        return Objects.requireNonNull(securityUser).getID();
+        if(object instanceof SecurityUser securityUser)
+            return Objects.requireNonNull(securityUser).getID();
+        else
+            return -1;
     }
 
 
     public static boolean isAdmin(){
 
-        SecurityUser securityUser = (SecurityUser) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+        Object object = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 
-        return Objects.requireNonNull(securityUser).isAdmin();
+        if(object instanceof SecurityUser securityUser)
+            return Objects.requireNonNull(securityUser).isAdmin();
+        else
+            return false;
     }
 }

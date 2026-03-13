@@ -47,6 +47,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
                         .requestMatchers("/verifyEmail/**").permitAll()
                         .requestMatchers("/user/exist/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/article/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .anyRequest().authenticated()
         );

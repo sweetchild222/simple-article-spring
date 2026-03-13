@@ -26,7 +26,7 @@ public class ArticleController {
         final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
 
-        if(title == null || content == null || open == null || posted == null || thumbnail == null || categoryId == null)
+        if(title == null || content == null || open == null || posted == null || thumbnail == null || userId == null || categoryId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String strOpen = (open ? "1" : "0");
@@ -96,13 +96,43 @@ public class ArticleController {
 
 
     @PutMapping("/article/{articleId}")
-    public ResponseEntity<?> putArticle(@RequestBody @NotNull Map<String, Object> payload) {
+    public ResponseEntity<?> putArticle(@PathVariable long articleId, @RequestBody @NotNull Map<String, Object> payload) {
 
+        final String title = ObjectCovert.asString(payload.get("title"));
+        final String content = ObjectCovert.asString(payload.get("content"));
+        final Boolean open = ObjectCovert.asBoolean(payload.get("open"));
+        final Boolean posted = ObjectCovert.asBoolean(payload.get("posted"));
+        final String thumbnail = ObjectCovert.asString(payload.get("thumbnail"));
+        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
+        final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
 
+        if(title == null || content == null || open == null || posted == null || thumbnail == null || userId == null || categoryId == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(userId.longValue() != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
+        final String strOpen = (open ? "1" : "0");
+        final String strPosted = (posted ? "1" : "0");
+        final String strUserId = String.valueOf(userId);
+        final String strCategoryId = String.valueOf(categoryId);
 
+        String sql = "update article set ";
+        sql += "title='" + title + "', content='" + content + "', open=" + strOpen;
+        sql += ", posted=" + strPosted + ", thumbnail='" + thumbnail +"', category_id=" + strCategoryId;
+        sql += " where id=" + articleId + " and user_id=" + strUserId;
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+
+        if(matchCount == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(matchCount == 0)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else if(matchCount == 1)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else {
+            Log.error("Unexcepted affect count: " + matchCount);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

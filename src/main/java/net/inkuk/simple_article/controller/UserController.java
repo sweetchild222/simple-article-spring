@@ -199,8 +199,6 @@ public class UserController {
 
         final String passwordSource = map.get("password").toString();
 
-
-
         boolean match = (new BCryptPasswordEncoder()).matches(password, passwordSource);
 
         return new ResponseEntity<>(Map.of("correct", match), HttpStatus.OK);
@@ -223,16 +221,16 @@ public class UserController {
 
         final String sql = this.makeSQL(items, userId);
 
-        int affectCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+        int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
-        if(affectCount == -1)
+        if(matchCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        else if(affectCount == 0)
+        else if(matchCount == 0)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else if(affectCount == 1)
+        else if(matchCount == 1)
             return new ResponseEntity<>(HttpStatus.OK);
         else {
-            Log.error("Unexcepted affect count: " + affectCount);
+            Log.error("Unexcepted match count: " + matchCount);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -295,24 +295,32 @@ public class DataBaseClient {
             switch (columnType) {
                 case Types.LONGNVARCHAR:
                 case Types.CHAR:
-                case Types.VARCHAR:
-                    map.put(columnName, resultSet.getString(i));
+                case Types.VARCHAR: {
+                    String value = resultSet.getString(i);
+                    map.put(columnName, resultSet.wasNull() ? null : value);
                     break;
+                }
 
                 case Types.TIMESTAMP: {
-                    Timestamp timestamp = resultSet.getTimestamp(i);
-                    map.put(columnName, (timestamp != null ? timestamp.getTime() : null));
+                    Timestamp value = resultSet.getTimestamp(i);
+                    map.put(columnName, resultSet.wasNull() ? null : value.getTime());
                     break;
                 }
 
                 case Types.BIGINT:
-                case Types.INTEGER:
-                    map.put(columnName, resultSet.getLong(i));
-                    break;
+                case Types.INTEGER: {
 
-                case Types.TINYINT:
-                    map.put(columnName, resultSet.getInt(i));
+                    long value = resultSet.getLong(i);
+                    map.put(columnName, resultSet.wasNull() ? null : value);
                     break;
+                }
+
+                case Types.TINYINT: {
+
+                    int value = resultSet.getInt(i);
+                    map.put(columnName, resultSet.wasNull() ? null : value);
+                    break;
+                }
 
                 default:
                     Log.error(String.valueOf(columnType) + ": Unsupported type " + columnName);

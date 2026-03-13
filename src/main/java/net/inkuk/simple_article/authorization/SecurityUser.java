@@ -1,5 +1,6 @@
 package net.inkuk.simple_article.authorization;
 
+import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -71,6 +72,20 @@ public class SecurityUser implements UserDetails {
     public @NotNull Collection<GrantedAuthority> getAuthorities() {
 
         return this.authorityList;
+    }
+
+
+    public boolean isAdmin(){
+
+        String [] authorities = getAuthoritiesString();
+
+        for (String authoritie : authorities) {
+
+            if (authoritie.equals("ADMIN"))
+                return true;
+        }
+
+        return false;
     }
 
 

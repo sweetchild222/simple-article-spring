@@ -11,7 +11,14 @@ public class UserContext {
 
         SecurityUser securityUser = (SecurityUser) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 
-
         return Objects.requireNonNull(securityUser).getID();
+    }
+
+
+    public static boolean isAdmin(){
+
+        SecurityUser securityUser = (SecurityUser) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+
+        return Objects.requireNonNull(securityUser).isAdmin();
     }
 }

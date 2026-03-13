@@ -75,10 +75,11 @@ public class ArticleController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+
     @DeleteMapping("/article/{articleId}")
     public ResponseEntity<?> deleteArticle(@PathVariable long articleId) {
 
-        final String sql = "delete from article where id=" + articleId + " and user_id=" + UserContext.userID();
+        final String sql = "delete from article where id=" + articleId + (UserContext.isAdmin() ? "" : " and user_id=" + UserContext.userID());
 
         int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 

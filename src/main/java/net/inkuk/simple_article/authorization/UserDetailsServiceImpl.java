@@ -32,9 +32,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final long id = (long)map.get("id");
         final String name = (String)map.get("username");
         final String password = (String)map.get("password");
-        final String authority = (String)map.get("authority");
+        final String authority = (String)map.get("role");
 
-        final List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + authority));
+        final List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(authority));
 
         return new SecurityUser(id, name, password, authorities);
 

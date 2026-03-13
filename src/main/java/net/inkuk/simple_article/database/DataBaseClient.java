@@ -299,9 +299,11 @@ public class DataBaseClient {
                     map.put(columnName, resultSet.getString(i));
                     break;
 
-                case Types.TIMESTAMP:
-                    map.put(columnName, resultSet.getTimestamp(i).getTime());
+                case Types.TIMESTAMP: {
+                    Timestamp timestamp = resultSet.getTimestamp(i);
+                    map.put(columnName, (timestamp != null ? timestamp.getTime() : null));
                     break;
+                }
 
                 case Types.BIGINT:
                 case Types.INTEGER:

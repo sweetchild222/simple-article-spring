@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -28,13 +29,15 @@ public class UserController {
 
         final String sql = "select username, profile, create_at from user where id = " + String.valueOf(userId);
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
 
-        if(map == null)
+        if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(map.isEmpty())
+        if(list.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Map<String, Object> map = list.getFirst();
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
@@ -45,13 +48,15 @@ public class UserController {
 
         final String sql = "select count(*) > 0 as exist from user where username = '" + username + "'";
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
 
-        if(map == null)
+        if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(map.isEmpty())
+        if(list.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Map<String, Object> map = list.getFirst();
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
@@ -189,13 +194,15 @@ public class UserController {
 
         final String sql = "select password from user where id=" + String.valueOf(userId);
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
 
-        if(map == null)
+        if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(map.isEmpty())
+        if(list.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Map<String, Object> map = list.getFirst();
 
         final String passwordSource = map.get("password").toString();
 

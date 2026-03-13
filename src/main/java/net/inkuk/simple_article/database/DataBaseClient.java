@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 //import org.apache.tomcat.jdbc.pool.DataSource;
 
 import java.sql.*;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class DataBaseClient {
 
@@ -102,7 +100,7 @@ public class DataBaseClient {
     }
 
 
-    public Map<String, Object> getRow(String sql) {
+    public List<Map<String, Object>> getRow(String sql) {
 
         Log.info(sql);
 
@@ -180,7 +178,7 @@ public class DataBaseClient {
     }
 
 
-    private @Nullable Map<String, Object> executeSelect(String sql) throws SQLException {
+    private @Nullable List<Map<String, Object>> executeSelect(String sql) throws SQLException {
 
         Connection connection = getConnection();
 
@@ -196,11 +194,23 @@ public class DataBaseClient {
 
         ResultSet resultSet =  statement.executeQuery(sql);
 
-        Map<String, Object> map = convertMap(resultSet);
+        List<Map<String, Object>> list = new LinkedList<>();
+
+        if(!resultSet.first()) {
+            resultSet.close();
+            return list;
+        }
+
+        do{
+
+            Map<String, Object> map = convertMap(resultSet);
+            list.add(map);
+
+        } while(resultSet.next());
 
         resultSet.close();
 
-        return map;
+        return list;
     }
 
 
@@ -280,8 +290,8 @@ public class DataBaseClient {
 
     private @Nullable Map<String, Object> convertMap(ResultSet resultSet) throws SQLException {
 
-        if(!resultSet.first())
-            return new java.util.HashMap<>(Map.of());
+        //if(!resultSet.first())
+            //return new java.util.HashMap<>(Map.of());
 
         final ResultSetMetaData metaData = resultSet.getMetaData();
 
@@ -316,7 +326,6 @@ public class DataBaseClient {
                 }
 
                 case Types.TINYINT: {
-
                     int value = resultSet.getInt(i);
                     map.put(columnName, resultSet.wasNull() ? null : value);
                     break;

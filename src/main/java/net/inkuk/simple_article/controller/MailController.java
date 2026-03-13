@@ -1,4 +1,3 @@
-package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
@@ -36,8 +35,6 @@ public class MailController {
             Date now = new Date();
 
             long span = now.getTime() - this.at.getTime();
-
-            Log.debug("span" + span);
 
             return (span > 1000 * 60 * 60);
         }

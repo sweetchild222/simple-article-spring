@@ -21,13 +21,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         final String sql = "select id, username, password, role from user where username = '" + username + "'";
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
 
-        if(map == null)
+        if(list == null)
             return SecurityUser.createInvalid();
 
-        if(map.isEmpty())
+        if(list.isEmpty())
             return SecurityUser.createEmpty();
+
+        Map<String, Object> map = list.getFirst();
 
         final long id = (long)map.get("id");
         final String name = (String)map.get("username");

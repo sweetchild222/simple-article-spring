@@ -1,15 +1,12 @@
 package net.inkuk.simple_article.controller;
 
-import net.inkuk.simple_article.authorization.SecurityUser;
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.ObjectCovert;
+import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -18,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 @RestController
@@ -42,30 +38,76 @@ public class UserController {
     }
 
 
-    @GetMapping("/user/{userId}/articles")
+
+
+    @GetMapping("/user/{userId}/article")
     public ResponseEntity<?> getArticles(@PathVariable long userId, @RequestParam Map<String, String> params) {
+
+        if(userId != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         final String open = ObjectCovert.asString(params.get("open"));
         final String posted = ObjectCovert.asString(params.get("posted"));
+        final String categoryId = ObjectCovert.asString(params.get("category_id"));
         final String userIdParam = ObjectCovert.asString(params.get("user_id"));
-
         final String offset = ObjectCovert.asString(params.get("offset"));
         final String limit = ObjectCovert.asString(params.get("limit"));
         final String order = ObjectCovert.asString(params.get("order"));
 
+        if(userIdParam == null || !userIdParam.equals(String.valueOf(userId)))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
+        if(!QueryParamChecker.validInteger(open, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        //final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
+        if(!QueryParamChecker.validInteger(posted, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(categoryId != null && !categoryId.equals("null")) {
+            if (!QueryParamChecker.validInteger(categoryId, 0, null, true)) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        if (!QueryParamChecker.validInteger(offset, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(limit, 1, 5, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(order, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String sql = makeSql(open, posted, categoryId, userIdParam, offset, limit, order);
+
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(list.isEmpty())
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+
+    private static @NotNull String makeSql(String open, String posted, String categoryId, String userId, String offset, String limit, String order) {
+
+        final String strUserId = "user_id=" + userId;
+        final String strOpen = open != null ? "open=" + (open.equals("1") ? "1" : "0") : "";
+        final String strPosted = posted != null ? "posted=" + (posted.equals("1") ? "1" : "0") : "";
+        final String strCategoryId = categoryId != null ? (categoryId.equals("null") ? "category_id is null" : ("category_id=" + categoryId)) : "";
+        final String strOffset = "offset " + (offset != null ? offset : "0");
+        final String strLimit = "limit " + (limit != null ? limit : "5");
+        final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
+
+        String sql = "select id, title, category_id, open, posted, thumbnail, create_at, update_at, user_id from article where ";
+        sql += strUserId;
+        sql += strOpen.isEmpty() ? "" : (" and " + strOpen);
+        sql += strPosted.isEmpty() ? "" : (" and " + strPosted);
+        sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);
+        sql += " " + strOrder + " " + strLimit + " " + strOffset;
+
+        return sql;
+    }
 
 
     @GetMapping("/user/exist/{username}")

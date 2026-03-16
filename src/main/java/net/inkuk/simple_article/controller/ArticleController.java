@@ -62,7 +62,8 @@ public class ArticleController {
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getArticle(@PathVariable long articleId) {
 
-        String sql = "select * from article where id=" + String.valueOf(articleId);
+        String sql = "select * from article as a inner join category as c on a.category_id = c.id where a.id=" + String.valueOf(articleId);
+        sql += UserContext.isGuest() ? " and a.open=1 and a.posted=1" : " and c.user_id = " + UserContext.userID();
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
@@ -71,19 +72,6 @@ public class ArticleController {
 
         if(map.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        Number userId = ObjectCovert.asNumber(map.get("user_id"));
-        Number open = ObjectCovert.asNumber(map.get("open"));
-        Number posted = ObjectCovert.asNumber(map.get("posted"));
-
-        if(userId == null || open == null)
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        if(open.longValue() == 0 && (userId.longValue() != UserContext.userID()))
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
-        if(posted.longValue() == 0 && (userId.longValue() != UserContext.userID()))
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }

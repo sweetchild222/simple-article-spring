@@ -18,6 +18,13 @@ public class UserContext {
     }
 
 
+    public static boolean isGuest(){
+
+        return userID() == -1;
+
+    }
+
+
     public static boolean isAdmin(){
 
         Object object = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();

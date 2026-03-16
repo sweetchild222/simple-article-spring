@@ -92,28 +92,27 @@ public class ArticleController {
     @PostMapping("/article")
     public ResponseEntity<?> postArticle(@RequestBody @NotNull Map<String, Object> payload) {
 
+        if(UserContext.isGuest())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
         final String title = ObjectCovert.asString(payload.get("title"));
         final String content = ObjectCovert.asString(payload.get("content"));
         final Number open = ObjectCovert.asNumber(payload.get("open"));
         final Number posted = ObjectCovert.asNumber(payload.get("posted"));
         final String thumbnail = ObjectCovert.asString(payload.get("thumbnail"));
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
-        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
 
-        if(title == null || content == null || open == null || posted == null || thumbnail == null || userId == null)
+        if(title == null || content == null || open == null || posted == null || thumbnail == null || categoryId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(userId.longValue() != UserContext.userID())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         final String strOpen = (open.longValue() == 1 ? "1" : "0");
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
-        final String strCategoryId = categoryId == null ? "null" : String.valueOf(categoryId);
-        final String strUserId = String.valueOf(userId);
+        final String strCategoryId = String.valueOf(categoryId);
+        final String strUserId = String.valueOf(UserContext.userID());
 
-        String sql = "insert into article (title, content, open, posted, thumbnail, category_id, user_id) ";
-        sql += "select '" + title + "', '" + content + "', " + strOpen + ", " + strPosted + ", '" + thumbnail + "', " + strCategoryId + ", " + strUserId;
-        sql += (categoryId != null ? " where exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")" : "");
+        String sql = "insert into article (title, content, open, posted, thumbnail, category_id) ";
+        sql += "select '" + title + "', '" + content + "', " + strOpen + ", " + strPosted + ", '" + thumbnail + "', " + strCategoryId;
+        sql += " where exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
 
         long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 
@@ -129,30 +128,29 @@ public class ArticleController {
     @PutMapping("/article/{articleId}")
     public ResponseEntity<?> putArticle(@PathVariable long articleId, @RequestBody @NotNull Map<String, Object> payload) {
 
+        if(UserContext.isGuest())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
         final String title = ObjectCovert.asString(payload.get("title"));
         final String content = ObjectCovert.asString(payload.get("content"));
         final Number open = ObjectCovert.asNumber(payload.get("open"));
         final Number posted = ObjectCovert.asNumber(payload.get("posted"));
         final String thumbnail = ObjectCovert.asString(payload.get("thumbnail"));
-        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
 
-        if(title == null || content == null || open == null || posted == null || thumbnail == null || userId == null)
+        if(title == null || content == null || open == null || posted == null || thumbnail == null || categoryId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(userId.longValue() != UserContext.userID())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         final String strOpen = (open.longValue() == 1 ? "1" : "0");
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
-        final String strUserId = String.valueOf(userId);
-        final String strCategoryId = categoryId == null ? "null" : String.valueOf(categoryId);
+        final String strUserId = String.valueOf(UserContext.userID());
+        final String strCategoryId = String.valueOf(categoryId);
 
         String sql = "update article set ";
         sql += "title='" + title + "', content='" + content + "', open=" + strOpen;
         sql += ", posted=" + strPosted + ", thumbnail='" + thumbnail +"', category_id=" + strCategoryId;
-        sql += " where id=" + articleId + " and user_id=" + strUserId;
-        sql += (categoryId != null ? " and exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")" : "");
+        sql += " where id=" + articleId;
+        sql += " and exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
 
         int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 

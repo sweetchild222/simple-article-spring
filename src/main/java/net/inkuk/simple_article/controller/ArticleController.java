@@ -32,7 +32,7 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = makeSql(offset, limit, order);
+        final String sql = makeSql(offset, limit, order);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
@@ -51,7 +51,8 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "5");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select id, title, thumbnail, create_at, update_at, user_id from article where ";
+        String sql = "select a.id, a.title, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id ";
+        sql += "from article as a inner join category as c on a.category_id = c.id where ";
         sql += strOpen + " and " + strPosted + " ";
         sql += strOrder + " " + strLimit + " " + strOffset;
 

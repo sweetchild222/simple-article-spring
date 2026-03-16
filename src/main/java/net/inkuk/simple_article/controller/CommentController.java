@@ -21,15 +21,13 @@ public class CommentController {
 
         String sql = "select * from comment where id=" + String.valueOf(commentId);
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
-        if(list == null)
+        if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(list.isEmpty())
+        if(map.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        Map<String, Object> map = list.getFirst();
 
         Number userId = ObjectCovert.asNumber(map.get("user_id"));
         Number open = ObjectCovert.asNumber(map.get("open"));

@@ -100,7 +100,27 @@ public class DataBaseClient {
     }
 
 
-    public List<Map<String, Object>> getRow(String sql) {
+    public Map<String, Object> getRow(String sql) {
+
+        Log.info(sql);
+
+        try {
+
+            return executeSelectSingle(sql);
+
+        }
+        catch (SQLException e) {
+
+            if(e instanceof SQLNonTransientConnectionException)
+                close();
+
+            Log.error(e.toString());
+            return null;
+        }
+    }
+
+
+    public List<Map<String, Object>> getRows(String sql) {
 
         Log.info(sql);
 
@@ -214,6 +234,35 @@ public class DataBaseClient {
     }
 
 
+    private @Nullable Map<String, Object> executeSelectSingle(String sql) throws SQLException {
+
+        Connection connection = getConnection();
+
+        if(connection == null)
+            return null;
+
+        Statement statement = connection.createStatement();
+
+        if(statement == null)
+            return null;
+
+        statement.closeOnCompletion();
+
+        ResultSet resultSet =  statement.executeQuery(sql);
+
+        if(!resultSet.first()) {
+            resultSet.close();
+            return new java.util.HashMap<>(Map.of());
+        }
+
+        Map<String, Object> map = convertMap(resultSet);
+
+        resultSet.close();
+
+        return map;
+    }
+
+
     private long executeInsert(String sql) throws SQLException {
 
         Connection connection = getConnection();
@@ -289,9 +338,6 @@ public class DataBaseClient {
 
 
     private @Nullable Map<String, Object> convertMap(ResultSet resultSet) throws SQLException {
-
-        //if(!resultSet.first())
-            //return new java.util.HashMap<>(Map.of());
 
         final ResultSetMetaData metaData = resultSet.getMetaData();
 

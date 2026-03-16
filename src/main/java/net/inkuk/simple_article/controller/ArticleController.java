@@ -19,33 +19,13 @@ public class ArticleController {
     @GetMapping("/article")
     public ResponseEntity<?> getArticles(@RequestParam Map<String, String> params) {
 
-        final String open = ObjectCovert.asString(params.get("open"));
-        final String posted = ObjectCovert.asString(params.get("posted"));
-        final String categoryId = ObjectCovert.asString(params.get("category_id"));
-        final String userId = ObjectCovert.asString(params.get("user_id"));
         final String offset = ObjectCovert.asString(params.get("offset"));
         final String limit = ObjectCovert.asString(params.get("limit"));
         final String order = ObjectCovert.asString(params.get("order"));
 
+        String sql = makeSql(offset, limit, order);
 
-        final String strOpen = open != null ? "open=" + (open.equals("1") ? "1" : "0") : "";
-        final String strPosted = posted != null ? "posted=" + (posted.equals("1") ? "1" : "0") : "";
-        final String strCategoryId = categoryId != null ? "category_id=" + categoryId : "";
-        final String strUserId = userId != null ? "user_id=" + userId : "";
-        final String strOffset = "offset " + (offset != null ? offset : "0");
-        final String strLimit = "limit " + (limit != null ? limit : "5");
-        final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
-
-        String sql = "select * from article where ";
-        sql += strOpen + (strPosted.isEmpty() ? "" : " and " + strPosted);
-        sql += (strCategoryId.isEmpty() ? "" : " and " + strCategoryId);
-        sql += (strUserId.isEmpty() ? "" : " and " + strUserId);
-        sql += " " + strOrder + " " + strLimit + " " + strOffset;
-
-        Log.debug(sql);
-
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
-
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -53,27 +33,23 @@ public class ArticleController {
         if(list.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        Map<String, Object> map = list.getFirst();
-
-        for(String key : map.keySet()) {
-            Log.debug(key + ": " + map.get(key));
-        }
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
 
 
-        //Log.debug(sql);
+    private static @NotNull String makeSql(String offset, String limit, String order) {
 
+        final String strOpen = "open=1";
+        final String strPosted = "posted=1";
+        final String strOffset = "offset " + (offset != null ? offset : "0");
+        final String strLimit = "limit " + (limit != null ? limit : "5");
+        final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
+        String sql = "select title, thumbnail, create_at, update_at, user_id from article where ";
+        sql += strOpen + " and " + strPosted + " ";
+        sql += strOrder + " " + strLimit + " " + strOffset;
 
-        //for(String key : params.keySet()) {
-            //Log.debug(key + ": " + params.get(key).toString());
-        //}
-
-        //String sql = "select * from article where
-
-        //'open', '', category_id, posted, '', user_id, offset, limit
-
-
-        return new ResponseEntity<>(Map.of("id", 3), HttpStatus.OK);
+        return sql;
     }
 
 
@@ -82,15 +58,13 @@ public class ArticleController {
 
         String sql = "select * from article where id=" + String.valueOf(articleId);
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
-        if(list == null)
+        if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(list.isEmpty())
+        if(map.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        Map<String, Object> map = list.getFirst();
 
         Number userId = ObjectCovert.asNumber(map.get("user_id"));
         Number open = ObjectCovert.asNumber(map.get("open"));
@@ -98,8 +72,6 @@ public class ArticleController {
 
         if(userId == null || open == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        Log.debug(userId.longValue() + " " + UserContext.userID());
 
         if(open.longValue() == 0 && (userId.longValue() != UserContext.userID()))
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);

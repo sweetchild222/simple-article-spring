@@ -3,6 +3,7 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.authorization.SecurityUser;
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
+import net.inkuk.simple_article.util.ObjectCovert;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +30,32 @@ public class UserController {
 
         final String sql = "select username, profile, create_at from user where id = " + String.valueOf(userId);
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+
+        if(map == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(map.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/user/{userId}/articles")
+    public ResponseEntity<?> getArticles(@PathVariable long userId, @RequestParam Map<String, String> params) {
+
+        final String open = ObjectCovert.asString(params.get("open"));
+        final String posted = ObjectCovert.asString(params.get("posted"));
+        final String userIdParam = ObjectCovert.asString(params.get("user_id"));
+
+        final String offset = ObjectCovert.asString(params.get("offset"));
+        final String limit = ObjectCovert.asString(params.get("limit"));
+        final String order = ObjectCovert.asString(params.get("order"));
+
+
+
+        //final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -37,10 +63,9 @@ public class UserController {
         if(list.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        Map<String, Object> map = list.getFirst();
-
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
+
 
 
     @GetMapping("/user/exist/{username}")
@@ -48,15 +73,13 @@ public class UserController {
 
         final String sql = "select count(*) > 0 as exist from user where username = '" + username + "'";
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
-        if(list == null)
+        if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(list.isEmpty())
+        if(map.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        Map<String, Object> map = list.getFirst();
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
@@ -194,15 +217,13 @@ public class UserController {
 
         final String sql = "select password from user where id=" + String.valueOf(userId);
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
-        if(list == null)
+        if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        if(list.isEmpty())
+        if(map.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        Map<String, Object> map = list.getFirst();
 
         final String passwordSource = map.get("password").toString();
 

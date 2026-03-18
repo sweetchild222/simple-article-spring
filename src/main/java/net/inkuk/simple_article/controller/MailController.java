@@ -59,6 +59,8 @@ public class MailController {
     @PostMapping("/verifyEmail")
     public ResponseEntity<?> postVerifyEmail(@RequestBody @NotNull Map<String, String> payload) {
 
+        Log.debug("asdffasd");
+
         String email = payload.get("email");
 
         if(email == null)

@@ -20,6 +20,9 @@ public class CategoryController {
     @GetMapping("/user/{userId}/category")
     public ResponseEntity<?> getCategories(@PathVariable long userId) {
 
+        if(userId != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
         String sql = "select * from category where user_id = " + String.valueOf(userId);
         sql += " order by id asc";
 
@@ -57,9 +60,6 @@ public class CategoryController {
     @PatchMapping("/category/{categoryId}")
     public ResponseEntity<?> patchCategory(@PathVariable long categoryId, @RequestBody Map<String, String> payload) {
 
-        //if(userId != UserContext.userID())
-            //return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
         if(payload.isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -70,8 +70,6 @@ public class CategoryController {
 
         String sql = "update category set name = '" + name + "'";
         sql += " where id = " + String.valueOf(categoryId)  + " and user_id=" + String.valueOf(UserContext.userID());
-
-        Log.debug(sql);
 
         int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
@@ -88,4 +86,31 @@ public class CategoryController {
     }
 
 
+    @PostMapping("/category")
+    public ResponseEntity<?> postCategory(@RequestBody @NotNull Map<String, Object> payload) {
+
+        final String name = ObjectCovert.asString(payload.get("name"));
+        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
+
+        if(name == null || userId == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(userId.longValue() != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        final String strUserId = String.valueOf(userId);
+
+        String sql = "insert into category (name, user_id) ";
+        sql += "select '" + name + "', " + strUserId;
+        sql += " where (select count(*) from category where user_id=" + strUserId + ") < 10";
+
+        long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
+
+        if(id == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(id == 0)
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        else
+            return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
+    }
 }

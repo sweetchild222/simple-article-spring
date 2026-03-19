@@ -81,9 +81,6 @@ public class ArticleController {
     @PostMapping("/article")
     public ResponseEntity<?> postArticle(@RequestBody @NotNull Map<String, Object> payload) {
 
-        if(UserContext.isGuest())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
         final String title = ObjectCovert.asString(payload.get("title"));
         final String content = ObjectCovert.asString(payload.get("content"));
         final Number open = ObjectCovert.asNumber(payload.get("open"));
@@ -116,9 +113,6 @@ public class ArticleController {
 
     @PutMapping("/article/{articleId}")
     public ResponseEntity<?> putArticle(@PathVariable long articleId, @RequestBody @NotNull Map<String, Object> payload) {
-
-        if(UserContext.isGuest())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         final String title = ObjectCovert.asString(payload.get("title"));
         final String content = ObjectCovert.asString(payload.get("content"));

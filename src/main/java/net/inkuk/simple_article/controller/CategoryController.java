@@ -23,7 +23,7 @@ public class CategoryController {
         if(userId != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        String sql = "select * from category where user_id = " + String.valueOf(userId);
+        String sql = "select * from category where user_id = " + userId;
         sql += " order by id asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
@@ -38,8 +38,8 @@ public class CategoryController {
     @DeleteMapping("/category/{categoryId}")
     public ResponseEntity<?> deleteCategories(@PathVariable long categoryId) {
 
-        String sql = "delete from category where id = " + String.valueOf(categoryId);
-        sql += " and user_id = " + String.valueOf(UserContext.userID());
+        String sql = "delete from category where id = " + categoryId;
+        sql += " and user_id = " + UserContext.userID();
         sql += " and not exists " + "(select 1 from article where category_id = " + categoryId + ")";
 
         int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
@@ -69,7 +69,7 @@ public class CategoryController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update category set name = '" + name + "'";
-        sql += " where id = " + String.valueOf(categoryId)  + " and user_id=" + String.valueOf(UserContext.userID());
+        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID();
 
         int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
@@ -100,9 +100,11 @@ public class CategoryController {
 
         final String strUserId = String.valueOf(userId);
 
+        final int maxCategory = 10;
+
         String sql = "insert into category (name, user_id) ";
         sql += "select '" + name + "', " + strUserId;
-        sql += " where (select count(*) from category where user_id=" + strUserId + ") < 10";
+        sql += " where (select count(*) from category where user_id=" + strUserId + ") < " + maxCategory;
 
         long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 

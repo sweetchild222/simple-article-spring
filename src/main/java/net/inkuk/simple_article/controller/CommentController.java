@@ -18,7 +18,7 @@ public class CommentController {
     @GetMapping("/article/{articleId}/comment")
     public ResponseEntity<?> getArticleComment(@PathVariable long articleId) {
 
-        String sql = "select * from comment where article_id=" + String.valueOf(articleId);
+        String sql = "select * from comment where article_id=" + articleId;
         sql += " order by create_at asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
@@ -33,8 +33,8 @@ public class CommentController {
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable long commentId) {
 
-        String sql = "delete from comment where id = " + String.valueOf(commentId);
-        sql += " and user_id = " + String.valueOf(UserContext.userID());
+        String sql = "delete from comment where id = " + commentId;
+        sql += " and user_id = " + UserContext.userID();
 
         int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 

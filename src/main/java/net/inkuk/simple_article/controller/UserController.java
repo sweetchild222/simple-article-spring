@@ -23,7 +23,7 @@ public class UserController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
 
-        final String sql = "select username, profile, create_at from user where id = " + String.valueOf(userId);
+        final String sql = "select username, profile, create_at from user where id = " + userId;
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 

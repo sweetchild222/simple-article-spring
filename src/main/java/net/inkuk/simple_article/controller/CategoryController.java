@@ -8,6 +8,7 @@ import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.config.annotation.web.LogoutDsl;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,8 @@ public class CategoryController {
     @GetMapping("/user/{userId}/category")
     public ResponseEntity<?> getCategories(@PathVariable long userId) {
 
-        final String sql = "select * from category where user_id = " + String.valueOf(userId);
+        String sql = "select * from category where user_id = " + String.valueOf(userId);
+        sql += " order by id asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
@@ -50,5 +52,40 @@ public class CategoryController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    @PatchMapping("/category/{categoryId}")
+    public ResponseEntity<?> patchCategory(@PathVariable long categoryId, @RequestBody Map<String, String> payload) {
+
+        //if(userId != UserContext.userID())
+            //return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        if(payload.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String name = payload.get("name");
+
+        if(name == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String sql = "update category set name = '" + name + "'";
+        sql += " where id = " + String.valueOf(categoryId)  + " and user_id=" + String.valueOf(UserContext.userID());
+
+        Log.debug(sql);
+
+        int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+
+        if(matchCount == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(matchCount == 0)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else if(matchCount == 1)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else {
+            Log.error("Unexcepted match count: " + matchCount);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 }

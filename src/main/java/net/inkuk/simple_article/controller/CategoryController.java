@@ -69,7 +69,7 @@ public class CategoryController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update category set name = '" + name + "'";
-        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID();
+        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID() + " and is_common=0";
 
         int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 

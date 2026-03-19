@@ -174,4 +174,68 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/user/{userId}/article")
+    public ResponseEntity<?> getArticles(@PathVariable long userId, @RequestParam Map<String, String> params) {
+
+        if(userId != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        final String open = ObjectCovert.asString(params.get("open"));
+        final String posted = ObjectCovert.asString(params.get("posted"));
+        final String categoryId = ObjectCovert.asString(params.get("category_id"));
+        final String offset = ObjectCovert.asString(params.get("offset"));
+        final String limit = ObjectCovert.asString(params.get("limit"));
+        final String order = ObjectCovert.asString(params.get("order"));
+
+        if(!QueryParamChecker.validInteger(open, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!QueryParamChecker.validInteger(posted, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(categoryId, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(offset, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(limit, 1, 5, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(order, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String sql = this.makeSelectSql(String.valueOf(userId), open, posted, categoryId, offset, limit, order);
+
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
+
+        if(list == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+
+    private @NotNull String makeSelectSql(String userId, String open, String posted, String categoryId, String offset, String limit, String order) {
+
+        final String strUserId = "c.user_id=" + userId;
+        final String strOpen = open != null ? "a.open=" + (open.equals("1") ? "1" : "0") : "";
+        final String strPosted = posted != null ? "a.posted=" + (posted.equals("1") ? "1" : "0") : "";
+        final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
+        final String strOffset = "offset " + (offset != null ? offset : "0");
+        final String strLimit = "limit " + (limit != null ? limit : "5");
+        final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
+
+        String sql = "select a.id, a.title, a.category_id, a.open, a.posted, a.thumbnail, a.create_at, a.update_at, c.user_id ";
+        sql += "from article as a inner join category as c on a.category_id = c.id where ";
+        sql += strUserId;
+        sql += strOpen.isEmpty() ? "" : (" and " + strOpen);
+        sql += strPosted.isEmpty() ? "" : (" and " + strPosted);
+        sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);
+        sql += " " + strOrder + " " + strLimit + " " + strOffset;
+
+        return sql;
+    }
+
 }

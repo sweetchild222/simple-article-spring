@@ -64,7 +64,7 @@ public class ArticleController {
     public ResponseEntity<?> getArticle(@PathVariable long articleId) {
 
         String sql = "select * from article as a inner join category as c on a.category_id = c.id where a.id=" + articleId;
-        sql += UserContext.isGuest() ? " and a.open=1 and a.posted=1" : " and c.user_id = " + UserContext.userID();
+        sql += " and ((a.open=1 and a.posted=1) or (c.user_id = " + UserContext.userID() + "))";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 

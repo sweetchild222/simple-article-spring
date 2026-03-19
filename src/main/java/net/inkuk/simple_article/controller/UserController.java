@@ -37,6 +37,43 @@ public class UserController {
     }
 
 
+    @GetMapping("/user")
+    public ResponseEntity<?> getUsers(@RequestParam Map<String, String> params) {
+
+        String paramId = params.get("id");
+
+        if(paramId == null)
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        String [] ids = paramId.split(",");
+
+        if(ids.length > 1000)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        StringBuilder sqlBuilder = new StringBuilder("select * from user where ");
+
+        int count = ids.length;
+
+        for(String id: ids) {
+            if (!QueryParamChecker.validInteger(id, 0, null, false))
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            else{
+                count--;
+                sqlBuilder.append("id=").append(count > 0 ? (id + " or ") : id);
+            }
+        }
+
+        final String sql = sqlBuilder.toString();
+
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
+
+        if(list == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+
 
     @GetMapping("/user/exist/{username}")
     public ResponseEntity<?> getUserExist(@PathVariable String username) {

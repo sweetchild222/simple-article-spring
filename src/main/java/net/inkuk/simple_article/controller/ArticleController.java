@@ -26,7 +26,7 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (!QueryParamChecker.validInteger(limit, 1, 5, true))
+        if (!QueryParamChecker.validInteger(limit, 1, 20, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
@@ -48,7 +48,7 @@ public class ArticleController {
         final String strOpen = "open=1";
         final String strPosted = "posted=1";
         final String strOffset = "offset " + (offset != null ? offset : "0");
-        final String strLimit = "limit " + (limit != null ? limit : "5");
+        final String strLimit = "limit " + (limit != null ? limit : "20");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
         String sql = "select a.id, a.title, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id ";
@@ -172,9 +172,6 @@ public class ArticleController {
     @GetMapping("/user/{userId}/article")
     public ResponseEntity<?> getArticles(@PathVariable long userId, @RequestParam Map<String, String> params) {
 
-        if(userId != UserContext.userID())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
         final String open = ObjectCovert.asString(params.get("open"));
         final String posted = ObjectCovert.asString(params.get("posted"));
         final String categoryId = ObjectCovert.asString(params.get("category_id"));
@@ -194,11 +191,17 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (!QueryParamChecker.validInteger(limit, 1, 5, true))
+        if (!QueryParamChecker.validInteger(limit, 1, 20, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(userId != UserContext.userID()) {
+
+            if(open != null || posted != null || categoryId != null)
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
         final String sql = this.makeSelectSql(String.valueOf(userId), open, posted, categoryId, offset, limit, order);
 
@@ -218,7 +221,7 @@ public class ArticleController {
         final String strPosted = posted != null ? "a.posted=" + (posted.equals("1") ? "1" : "0") : "";
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
         final String strOffset = "offset " + (offset != null ? offset : "0");
-        final String strLimit = "limit " + (limit != null ? limit : "5");
+        final String strLimit = "limit " + (limit != null ? limit : "20");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
         String sql = "select a.id, a.title, a.category_id, a.open, a.posted, a.thumbnail, a.create_at, a.update_at, c.user_id ";
@@ -231,5 +234,4 @@ public class ArticleController {
 
         return sql;
     }
-
 }

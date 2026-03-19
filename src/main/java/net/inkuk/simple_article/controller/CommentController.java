@@ -7,7 +7,6 @@ import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +19,7 @@ public class CommentController {
     public ResponseEntity<?> getArticleComment(@PathVariable long articleId) {
 
         String sql = "select * from comment where article_id=" + String.valueOf(articleId);
+        sql += " order by create_at asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
@@ -31,7 +31,7 @@ public class CommentController {
 
 
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<?> deleteCategories(@PathVariable long commentId) {
+    public ResponseEntity<?> deleteComment(@PathVariable long commentId) {
 
         String sql = "delete from comment where id = " + String.valueOf(commentId);
         sql += " and user_id = " + String.valueOf(UserContext.userID());
@@ -52,7 +52,7 @@ public class CommentController {
 
 
     @PostMapping("/comment")
-    public ResponseEntity<?> posComment(@RequestBody @NotNull Map<String, Object> payload) {
+    public ResponseEntity<?> postComment(@RequestBody @NotNull Map<String, Object> payload) {
 
         final String comment = ObjectCovert.asString(payload.get("comment"));
         final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
@@ -83,6 +83,4 @@ public class CommentController {
         else
             return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
     }
-
-
 }

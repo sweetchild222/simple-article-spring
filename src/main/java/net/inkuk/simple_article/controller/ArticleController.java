@@ -45,15 +45,16 @@ public class ArticleController {
 
     private static @NotNull String makeSql(String offset, String limit, String order) {
 
-        final String strOpen = "open=1";
-        final String strPosted = "posted=1";
+        final String strOpen = "a.open=1";
+        final String strPosted = "a.posted=1";
+        final String strSourceId = "a.source_id is null";
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strLimit = "limit " + (limit != null ? limit : "20");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
         String sql = "select a.id, a.title, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id ";
         sql += "from article as a inner join category as c on a.category_id = c.id where ";
-        sql += strOpen + " and " + strPosted + " ";
+        sql += strOpen + " and " + strPosted + " and " + strSourceId + " ";
         sql += strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
@@ -87,20 +88,26 @@ public class ArticleController {
         final Number posted = ObjectCovert.asNumber(payload.get("posted"));
         final String thumbnail = ObjectCovert.asString(payload.get("thumbnail"));
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
+        final Number sourceId = ObjectCovert.asNumber(payload.get("source_id"));
 
         if(title == null || content == null || open == null || posted == null || thumbnail == null || categoryId == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(sourceId != null && posted.longValue() == 1)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String strOpen = (open.longValue() == 1 ? "1" : "0");
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
         final String strCategoryId = String.valueOf(categoryId);
         final String strUserId = String.valueOf(UserContext.userID());
+        final String strSourceId = sourceId != null ? String.valueOf(sourceId) : "null";
 
-        String sql = "insert ignore into article (title, content, open, posted, thumbnail, category_id) ";
-        sql += "select '" + title + "', '" + content + "', " + strOpen + ", " + strPosted + ", '" + thumbnail + "', " + strCategoryId;
+        String sql = "insert ignore into article (title, content, open, posted, thumbnail, category_id, source_id)";
+        sql += " select '" + title + "', '" + content + "', " + strOpen + ", " + strPosted + ", '" + thumbnail + "', " + strCategoryId + ", " + strSourceId;
         sql += " where exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
+        sql += sourceId != null ? " and exists " + "(select 1 from article as a inner join category as c on a.category_id = c.id where c.user_id=" + strUserId + " and a.id=" + strSourceId + ")" : "";
 
-        long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
+        final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -135,7 +142,7 @@ public class ArticleController {
         sql += " where id=" + articleId;
         sql += " and exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
 
-        int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+        final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
         if(matchCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -157,7 +164,7 @@ public class ArticleController {
         sql += " where a.id=" + articleId;
         sql += (UserContext.isAdmin() ? "" : " and c.user_id=" + UserContext.userID());
 
-        int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
+        final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
         if (affectCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -180,6 +187,7 @@ public class ArticleController {
         final String offset = ObjectCovert.asString(params.get("offset"));
         final String limit = ObjectCovert.asString(params.get("limit"));
         final String order = ObjectCovert.asString(params.get("order"));
+        final String sourceId = ObjectCovert.asString(params.get("source_id"));
 
         if(!QueryParamChecker.validInteger(open, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -199,13 +207,16 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if (!QueryParamChecker.validInteger(sourceId, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         if(userId != UserContext.userID()) {
 
             if(open != null || posted != null || categoryId != null)
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        final String sql = this.makeSelectSql(String.valueOf(userId), open, posted, categoryId, offset, limit, order);
+        final String sql = this.makeSelectSql(String.valueOf(userId), open, posted, categoryId, offset, limit, order, sourceId);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
@@ -216,9 +227,10 @@ public class ArticleController {
     }
 
 
-    private @NotNull String makeSelectSql(String userId, String open, String posted, String categoryId, String offset, String limit, String order) {
+    private @NotNull String makeSelectSql(String userId, String open, String posted, String categoryId, String offset, String limit, String order, String sourceId) {
 
         final String strUserId = "c.user_id=" + userId;
+        final String strSourceId = sourceId != null ? ("a.source_id=" + sourceId) : "";
         final String strOpen = open != null ? "a.open=" + (open.equals("1") ? "1" : "0") : "";
         final String strPosted = posted != null ? "a.posted=" + (posted.equals("1") ? "1" : "0") : "";
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
@@ -226,9 +238,10 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "20");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select a.id, a.title, a.category_id, a.open, a.posted, a.thumbnail, a.create_at, a.update_at, c.user_id ";
+        String sql = "select a.id, a.title, a.category_id, a.open, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, c.user_id ";
         sql += "from article as a inner join category as c on a.category_id = c.id where ";
         sql += strUserId;
+        sql += strSourceId.isEmpty() ? "" : (" and " + strSourceId);
         sql += strOpen.isEmpty() ? "" : (" and " + strOpen);
         sql += strPosted.isEmpty() ? "" : (" and " + strPosted);
         sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);

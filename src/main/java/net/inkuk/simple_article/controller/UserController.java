@@ -131,7 +131,7 @@ public class UserController {
         sql += "where not exists ";
         sql += "(select 1 from user where username = '" + username + "')";
 
-        long id = DataBaseClientPool.getClient().postRow(sql);
+        final long id = DataBaseClientPool.getClient().postRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -233,7 +233,7 @@ public class UserController {
 
         final String sql = this.makeUpdateSQL(items, userId);
 
-        int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+        final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
         if(matchCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

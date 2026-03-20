@@ -61,13 +61,13 @@ public class MailController {
 
         Log.debug("asdffasd");
 
-        String email = payload.get("email");
+        final String email = payload.get("email");
 
         if(email == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        long code = createCode();
-        boolean success = this.emailService.sendEMail(email, code);
+        final long code = createCode();
+        final boolean success = this.emailService.sendEMail(email, code);
 
         if(success) {
             this.hashCodeAt.remove(email);
@@ -83,12 +83,12 @@ public class MailController {
 
         this.hashCodeAt.values().removeIf(entry -> entry.isExpired());
 
-        CodeAt codeAt = this.hashCodeAt.get(mail);
+        final CodeAt codeAt = this.hashCodeAt.get(mail);
 
         if(codeAt == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        boolean isMatch = codeAt.isMatch(code);
+        final boolean isMatch = codeAt.isMatch(code);
 
         if(isMatch)
             this.hashCodeAt.remove(mail);

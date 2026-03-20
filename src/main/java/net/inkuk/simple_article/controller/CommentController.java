@@ -36,7 +36,7 @@ public class CommentController {
         String sql = "delete from comment where id = " + commentId;
         sql += " and user_id = " + UserContext.userID();
 
-        int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
+        final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
         if (affectCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -74,7 +74,7 @@ public class CommentController {
         sql += " where exists " + "(select 1 from article where id=" +  strArticleId + ")";
         sql += commentId != null ? " and exists (select 1 from comment where id=" + strCommentId + ")" : "";
 
-        long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
+        final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

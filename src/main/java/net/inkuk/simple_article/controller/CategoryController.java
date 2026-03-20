@@ -48,7 +48,7 @@ public class CategoryController {
         sql += " and user_id = " + UserContext.userID();
         sql += " and not exists " + "(select 1 from article where category_id = " + categoryId + ")";
 
-        int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
+        final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
         if (affectCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -77,7 +77,7 @@ public class CategoryController {
         String sql = "update category set name = '" + name + "'";
         sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID() + " and is_common=0";
 
-        int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+        final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
         if(matchCount == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -112,7 +112,7 @@ public class CategoryController {
         sql += "select '" + name + "', " + strUserId;
         sql += " where (select count(*) from category where user_id=" + strUserId + ") < " + maxCategory;
 
-        long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
+        final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

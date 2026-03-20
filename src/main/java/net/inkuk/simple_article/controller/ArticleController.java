@@ -63,7 +63,7 @@ public class ArticleController {
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getArticle(@PathVariable long articleId) {
 
-        String sql = "select * from article as a inner join category as c on a.category_id = c.id where a.id=" + articleId;
+        String sql = "select a.*, c.user_id as user_id from article as a inner join category as c on a.category_id = c.id where a.id=" + articleId;
         sql += " and ((a.open=1 and a.posted=1) or (c.user_id = " + UserContext.userID() + "))";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
@@ -96,7 +96,7 @@ public class ArticleController {
         final String strCategoryId = String.valueOf(categoryId);
         final String strUserId = String.valueOf(UserContext.userID());
 
-        String sql = "insert into article (title, content, open, posted, thumbnail, category_id) ";
+        String sql = "insert ignore into article (title, content, open, posted, thumbnail, category_id) ";
         sql += "select '" + title + "', '" + content + "', " + strOpen + ", " + strPosted + ", '" + thumbnail + "', " + strCategoryId;
         sql += " where exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
 
@@ -153,7 +153,9 @@ public class ArticleController {
     @DeleteMapping("/article/{articleId}")
     public ResponseEntity<?> deleteArticle(@PathVariable long articleId) {
 
-        final String sql = "delete from article where id=" + articleId + (UserContext.isAdmin() ? "" : " and user_id=" + UserContext.userID());
+        String sql = "delete a from article as a inner join category as c on a.category_id = c.id";
+        sql += " where a.id=" + articleId;
+        sql += (UserContext.isAdmin() ? "" : " and c.user_id=" + UserContext.userID());
 
         int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 

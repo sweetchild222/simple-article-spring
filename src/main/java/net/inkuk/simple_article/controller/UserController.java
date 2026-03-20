@@ -125,7 +125,7 @@ public class UserController {
         if(!(validPassword(password) && validUsername(username)))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "insert into user (username, password) select ";
+        String sql = "insert ignore into user (username, password) select ";
         sql += "'" + username + "', ";
         sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "' ";
         sql += "where not exists ";

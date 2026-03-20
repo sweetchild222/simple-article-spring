@@ -69,7 +69,7 @@ public class CommentController {
         final String strArticleId = String.valueOf(articleId);
         final String strCommentId = commentId != null ? String.valueOf(commentId) : "null";
 
-        String sql = "insert into comment (comment, user_id, article_id, comment_id) ";
+        String sql = "insert ignore into comment (comment, user_id, article_id, comment_id) ";
         sql += "select '" + comment + "', " + strUserId + ", " + strArticleId + ", " + strCommentId;
         sql += " where exists " + "(select 1 from article where id=" +  strArticleId + ")";
         sql += commentId != null ? " and exists (select 1 from comment where id=" + strCommentId + ")" : "";

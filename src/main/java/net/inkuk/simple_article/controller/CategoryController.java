@@ -18,12 +18,18 @@ import java.util.Map;
 public class CategoryController {
 
     @GetMapping("/user/{userId}/category")
-    public ResponseEntity<?> getCategories(@PathVariable long userId) {
+    public ResponseEntity<?> getCategories(@PathVariable long userId, @RequestParam Map<String, String> params) {
 
         if(userId != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        String sql = "select * from category where user_id = " + userId;
+        final String isCommon = ObjectCovert.asString(params.get("is_common"));
+
+        if(!QueryParamChecker.validInteger(isCommon, 0, 1, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String sql = "select * from category where user_id=" + userId;
+        sql += isCommon != null ? (" and is_common=" + isCommon) : "";
         sql += " order by id asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
@@ -102,7 +108,7 @@ public class CategoryController {
 
         final int maxCategory = 10;
 
-        String sql = "insert into category (name, user_id) ";
+        String sql = "insert ignore into category (name, user_id) ";
         sql += "select '" + name + "', " + strUserId;
         sql += " where (select count(*) from category where user_id=" + strUserId + ") < " + maxCategory;
 

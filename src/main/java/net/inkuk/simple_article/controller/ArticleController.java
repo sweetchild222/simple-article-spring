@@ -181,8 +181,8 @@ public class ArticleController {
     @GetMapping("/user/{userId}/article")
     public ResponseEntity<?> getArticles(@PathVariable long userId, @RequestParam Map<String, String> params) {
 
-        final String open = ObjectCovert.asString(params.get("open"));
         final String posted = ObjectCovert.asString(params.get("posted"));
+        final String open = ObjectCovert.asString(params.get("open"));
         final String categoryId = ObjectCovert.asString(params.get("category_id"));
         final String offset = ObjectCovert.asString(params.get("offset"));
         final String limit = ObjectCovert.asString(params.get("limit"));

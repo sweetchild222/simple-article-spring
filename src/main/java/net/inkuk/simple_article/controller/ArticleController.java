@@ -207,8 +207,11 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (!QueryParamChecker.validInteger(sourceId, 0, null, true))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (!QueryParamChecker.validInteger(sourceId, 0, null, true)) {
+
+            if(!sourceId.equals("none"))
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         if(userId != UserContext.userID()) {
 
@@ -230,7 +233,7 @@ public class ArticleController {
     private @NotNull String makeSelectSql(String userId, String open, String posted, String categoryId, String offset, String limit, String order, String sourceId) {
 
         final String strUserId = "c.user_id=" + userId;
-        final String strSourceId = sourceId != null ? ("a.source_id=" + sourceId) : "";
+        final String strSourceId = sourceId != null ? ("a.source_id" + (sourceId.equals("none")  ? " is null" : "=" + sourceId)) : "";
         final String strOpen = open != null ? "a.open=" + (open.equals("1") ? "1" : "0") : "";
         final String strPosted = posted != null ? "a.posted=" + (posted.equals("1") ? "1" : "0") : "";
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";

@@ -25,6 +25,8 @@ public class ImageSetWriter {
 
         String path = createFolder();
 
+        Log.debug(path);
+
         if(path == null)
             return null;
 

@@ -34,12 +34,12 @@ public class BlobController {
     private final ImageSetWriter profileSetWriter = new ImageSetWriter(profilePath);
 
 
-    private static final int[][] articleThumbnailSupportSizeList = {{256, 256}, {128, 128}, {64, 64}, {32, 32}};
+    private static final int[][] articleThumbnailSupportSizeList = {{1024, 768}, {800, 600}, {720, 480}, {640, 480}, {160, 120}};
     private static final String articleThumbnailPath = "/home/ubuntu/simple/blob/article/thumbnail";
     private final ImageSetWriter articleThumbnailSetWriter = new ImageSetWriter(articleThumbnailPath);
 
-    private static final String articlePath = "/home/ubuntu/simple/blob/article";
-    private final MultipartToFile multipartToFile = new MultipartToFile(articlePath);
+    private static final String articleImagePath = "/home/ubuntu/simple/blob/article/image";
+    private final MultipartToFile multipartToFile = new MultipartToFile(articleImagePath);
 
     @PostMapping("/blob/article")
     public ResponseEntity<?> postArticle(@RequestParam("image") MultipartFile multipartFile) {
@@ -288,7 +288,7 @@ public class BlobController {
     @GetMapping("/blob/article/{id}")
     public ResponseEntity<?> getArticle(@PathVariable String id) {
 
-        final String filePath = articlePath + "/" + id;
+        final String filePath = articleImagePath + "/" + id;
 
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

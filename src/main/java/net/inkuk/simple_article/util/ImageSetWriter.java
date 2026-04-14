@@ -42,8 +42,6 @@ public class ImageSetWriter {
 
                 boolean success = ImageIO.write(image, "webp", new File(filePath));
 
-                Log.debug("adfsa:" + success);
-
                 if(!success)
                     return null;
             }

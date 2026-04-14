@@ -10,7 +10,8 @@ public class Log {
     private static LogFile infoLogFile = new LogFile("log/info");
     private static LogFile errorLogFile = new LogFile("log/error");
 
-    public static void info(String message) {
+
+    private static void infoCore(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
         final StackTraceElement e = stacktrace[2];
@@ -29,21 +30,27 @@ public class Log {
     }
 
 
+    public static void info(String message) {
+
+        infoCore(message);
+    }
+
+
     public static void info(long message) {
 
-        info(String.valueOf(message));
+        infoCore(String.valueOf(message));
     }
 
 
     public static void info(int message) {
 
-        info(String.valueOf(message));
+        infoCore(String.valueOf(message));
     }
 
 
     public static void info(boolean message) {
 
-        info(String.valueOf(message));
+        infoCore(String.valueOf(message));
     }
 
 
@@ -57,7 +64,7 @@ public class Log {
     }
 
 
-    public static void error(String message) {
+    private static void errorCore(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
         final StackTraceElement e = stacktrace[2];
@@ -75,28 +82,35 @@ public class Log {
         errorLogFile.write("[" + time + "] " + log);
     }
 
+
+    public static void error(String message) {
+
+        errorCore(message);
+    }
+
+
     public static void error(long message) {
 
-        error(String.valueOf(message));
+        errorCore(String.valueOf(message));
     }
 
 
     public static void error(int message) {
 
-        error(String.valueOf(message));
+        errorCore(String.valueOf(message));
     }
 
 
     public static void error(boolean message) {
 
-        error(String.valueOf(message));
+        errorCore(String.valueOf(message));
     }
 
 
-    public static void debug(String message) {
+    private static void debugCore(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-        final StackTraceElement e = stacktrace[2];
+        final StackTraceElement e = stacktrace[3];
         final String methodName = e.getMethodName();
 
         final String cyan = "\u001B[93m";
@@ -108,23 +122,28 @@ public class Log {
     }
 
 
+    public static void debug(String message) {
+
+        debugCore(message);
+    }
+
+
     public static void debug(long message) {
 
-        debug(String.valueOf(message));
+        debugCore(String.valueOf(message));
     }
 
 
     public static void debug(int message) {
 
-        debug(String.valueOf(message));
+        debugCore(String.valueOf(message));
     }
 
 
     public static void debug(boolean message) {
 
-        debug(String.valueOf(message));
+        debugCore(String.valueOf(message));
     }
-
 
 
     public static void close(){

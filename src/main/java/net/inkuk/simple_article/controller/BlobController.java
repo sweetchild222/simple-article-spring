@@ -65,12 +65,18 @@ public class BlobController {
 
             final byte [] bytes = multipartFile.getBytes();
 
+
+
+
+
             final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
 
             if(srcImage == null)
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
             int orientation = getOrientation(new ByteArrayInputStream(bytes));
+
+
 
             final String id = writeImageSet(srcImage, orientation, profileSupportSizeList, profileSetWriter);
 
@@ -217,7 +223,7 @@ public class BlobController {
         if(split == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!(split.length == 2 && split[1].equals("png")))
+        if(!(split.length == 2 && split[1].equals("webp")))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(size == null) //set default size
@@ -245,7 +251,7 @@ public class BlobController {
         if(split == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!(split.length == 2 && split[1].equals("png")))
+        if(!(split.length == 2 && split[1].equals("webp")))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(size == null) //set default size
@@ -268,7 +274,7 @@ public class BlobController {
     private ResponseEntity createResponse(String filePath) {
 
         final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentType(MediaType.valueOf("image/webp"));
 
         try {
 

@@ -34,13 +34,15 @@ public class ImageSetWriter {
 
         for(BufferedImage image : imageSet) {
 
-            final String fileName = id + "_" + image.getWidth() + "x" + image.getHeight() + ".png";
+            final String fileName = id + "_" + image.getWidth() + "x" + image.getHeight() + ".webp";
 
             final String filePath = path + "/" + fileName;
 
             try {
 
-                boolean success = ImageIO.write(image, "PNG", new File(filePath));
+                boolean success = ImageIO.write(image, "webp", new File(filePath));
+
+                Log.debug("adfsa:" + success);
 
                 if(!success)
                     return null;
@@ -52,7 +54,7 @@ public class ImageSetWriter {
             }
         }
 
-        return id + ".png";
+        return id + ".webp";
     }
 
 

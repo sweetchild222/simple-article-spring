@@ -53,7 +53,7 @@ public class MultipartToFile {
 
         final String id = generateID();
 
-        final String fileName = id + ".png";
+        final String fileName = id + ".webp";
 
         final String filePath = path + "/" + fileName;
 

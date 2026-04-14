@@ -127,11 +127,11 @@ public class SimpleArticleApplication implements ApplicationRunner {
 
         boolean isFirst = true;
 
-        String representFileName = String.valueOf(orientation) + "_" + id + ".png";
+        String representFileName = String.valueOf(orientation) + "_" + id + ".wepb";
 
         for(BufferedImage image : images) {
 
-            final String fileName = isFirst ? representFileName : (String.valueOf(orientation) + "_" + id + "_" + image.getWidth() + "x" + image.getHeight() + ".png");
+            final String fileName = isFirst ? representFileName : (String.valueOf(orientation) + "_" + id + "_" + image.getWidth() + "x" + image.getHeight() + ".webp");
 
             isFirst = false;
 
@@ -149,7 +149,7 @@ public class SimpleArticleApplication implements ApplicationRunner {
 
         try {
 
-            return ImageIO.write(image, "PNG", new File(filePath));
+            return ImageIO.write(image, "webp", new File(filePath));
         }
         catch (IOException e){
 

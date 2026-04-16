@@ -20,29 +20,20 @@ public class ImageResize {
         int scaledWidth = widthRatio >= heightRatio ? targetWidth : Math.round(srcImage.getWidth() * heightRatio);
         int scaledHeight = widthRatio <= heightRatio ? targetHeight : Math.round(srcImage.getHeight() * widthRatio);
 
+        final int cropX = Math.max(0, (scaledWidth - targetWidth) / 2);
+        final int cropY = Math.max(0, (scaledHeight - targetHeight) / 2);
+
+        final int finalWidth = Math.min(targetWidth, scaledWidth - cropX);
+        final int finalHeight = Math.min(targetHeight, scaledHeight - cropY);
+
         final Image scaledImage = srcImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-        final BufferedImage newImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage newImage = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_ARGB);
 
         final Graphics2D g2d = newImage.createGraphics();
-        g2d.drawImage(scaledImage, 0, 0, null);
+        g2d.drawImage(scaledImage, 0, 0, finalWidth, finalHeight, cropX, cropY, cropX + finalWidth,  cropY + finalHeight, null);
         g2d.dispose();
 
         return newImage;
-    }
-
-
-    public static @NotNull BufferedImage crop(BufferedImage srcImage, int targetWidth, int targetHeight) {
-
-        final int srcWidth = srcImage.getWidth();
-        final int srcHeight = srcImage.getHeight();
-
-        final int cropX = Math.max(0, (srcWidth - targetWidth) / 2);
-        final int cropY = Math.max(0, (srcHeight - targetHeight) / 2);
-
-        final int finalWidth = Math.min(targetWidth, srcWidth - cropX);
-        final int finalHeight = Math.min(targetHeight, srcHeight - cropY);
-
-        return srcImage.getSubimage(cropX, cropY, finalWidth, finalHeight);
     }
 
 
@@ -65,10 +56,7 @@ public class ImageResize {
             } else {
 
                 final BufferedImage scaledImage = scaleToFit(rotatedSrcImage, targetWidth, targetHeight);
-
-                BufferedImage croppedImage = crop(scaledImage, targetWidth, targetHeight);
-
-                list.add(croppedImage);
+                list.add(scaledImage);
             }
         }
 

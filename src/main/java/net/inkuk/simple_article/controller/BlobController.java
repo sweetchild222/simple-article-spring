@@ -33,8 +33,7 @@ public class BlobController {
     private static final String profilePath = "/home/ubuntu/simple/blob/profile";
     private final ImageSetWriter profileSetWriter = new ImageSetWriter(profilePath);
 
-
-    private static final int[][] articleThumbnailSupportSizeList = {{1024, 768}, {800, 600}, {720, 480}, {640, 480}, {160, 120}};
+    private static final int[][] articleThumbnailSupportSizeList = {{1024, 768}, {800, 600}, {720, 480}, {640, 480}, {256, 256}, {160, 120}};
     private static final String articleThumbnailPath = "/home/ubuntu/simple/blob/article/thumbnail";
     private final ImageSetWriter articleThumbnailSetWriter = new ImageSetWriter(articleThumbnailPath);
 
@@ -65,18 +64,12 @@ public class BlobController {
 
             final byte [] bytes = multipartFile.getBytes();
 
-
-
-
-
             final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
 
             if(srcImage == null)
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
             int orientation = getOrientation(new ByteArrayInputStream(bytes));
-
-
 
             final String id = writeImageSet(srcImage, orientation, profileSupportSizeList, profileSetWriter);
 

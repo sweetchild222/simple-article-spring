@@ -23,13 +23,13 @@ public class CategoryController {
         if(userId != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final String isCommon = ObjectCovert.asString(params.get("is_common"));
+        final String isDefault = ObjectCovert.asString(params.get("is_default"));
 
-        if(!QueryParamChecker.validInteger(isCommon, 0, 1, true))
+        if(!QueryParamChecker.validInteger(isDefault, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "select * from category where user_id=" + userId;
-        sql += isCommon != null ? (" and is_common=" + isCommon) : "";
+        sql += isDefault != null ? (" and is_default=" + isDefault) : "";
         sql += " order by id asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
@@ -75,7 +75,7 @@ public class CategoryController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update category set name = '" + name + "'";
-        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID() + " and is_common=0";
+        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID() + " and is_default=0";
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 

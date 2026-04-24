@@ -40,6 +40,11 @@ public class BlobController {
     private static final String articleImagePath = "/home/ubuntu/simple/blob/article/image";
     private final MultipartToFile multipartToFile = new MultipartToFile(articleImagePath);
 
+    private static final int[][] blogThumbnailSupportSizeList = {{1024, 768}, {800, 600}, {720, 480}, {640, 480}, {256, 256}, {160, 120}};
+    private static final String blogThumbnailPath = "/home/ubuntu/simple/blob/blog/thumbnail";
+    private final ImageSetWriter blogThumbnailSetWriter = new ImageSetWriter(blogThumbnailPath);
+
+
     @PostMapping("/blob/article")
     public ResponseEntity<?> postArticle(@RequestParam("image") MultipartFile multipartFile) {
 
@@ -54,6 +59,20 @@ public class BlobController {
         return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
     }
 
+    @GetMapping("/blob/article/{id}")
+    public ResponseEntity<?> getArticle(@PathVariable String id) {
+
+        final String filePath = articleImagePath + "/" + id;
+
+        if(!(new File(filePath)).exists())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        return createResponse(filePath);
+    }
+
+
+
+
     @PostMapping("/blob/profile")
     public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile){
 
@@ -64,19 +83,7 @@ public class BlobController {
 
             final byte [] bytes = multipartFile.getBytes();
 
-            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
-
-            if(srcImage == null)
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-            int orientation = getOrientation(new ByteArrayInputStream(bytes));
-
-            final String id = writeImageSet(srcImage, orientation, profileSupportSizeList, profileSetWriter);
-
-            if(id == null)
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-            return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
+            return postMutiSizeCore(bytes, profileSupportSizeList, profileSetWriter);
         }
         catch (IOException e){
 
@@ -85,6 +92,74 @@ public class BlobController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/blob/profile/{id}")
+    public ResponseEntity<?> getProfile(@PathVariable String id, @RequestParam(required=false) String size) {
+
+        return getCore(id, size, profileSupportSizeList, profilePath);
+    }
+
+
+
+
+    @PostMapping("/blob/article/thumbnail")
+    public ResponseEntity<?> postArticleThumbnail(@RequestParam("image") MultipartFile multipartFile){
+
+        if(multipartFile.getSize() > (1000 * 1000 * 10))
+            return new ResponseEntity<>(HttpStatus.CONTENT_TOO_LARGE);
+
+        try {
+
+            final byte [] bytes = multipartFile.getBytes();
+
+            return postMutiSizeCore(bytes, articleThumbnailSupportSizeList, articleThumbnailSetWriter);
+        }
+        catch (IOException e){
+
+            Log.error(e.toString());
+
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/blob/article/thumbnail/{id}")
+    public ResponseEntity<?> getArticleThumbnail(@PathVariable String id, @RequestParam(required=false) String size) {
+
+        return getCore(id, size, articleThumbnailSupportSizeList, articleThumbnailPath);
+    }
+
+
+
+
+
+    @PostMapping("/blob/blog/thumbnail")
+    public ResponseEntity<?> postBlog(@RequestParam("image") MultipartFile multipartFile){
+
+        if(multipartFile.getSize() > (1000 * 1000 * 10))
+            return new ResponseEntity<>(HttpStatus.CONTENT_TOO_LARGE);
+
+        try {
+
+            final byte [] bytes = multipartFile.getBytes();
+
+            return postMutiSizeCore(bytes, blogThumbnailSupportSizeList, blogThumbnailSetWriter);
+        }
+        catch (IOException e){
+
+            Log.error(e.toString());
+
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @GetMapping("/blob/blog/thumbnail/{id}")
+    public ResponseEntity<?> getBlog(@PathVariable String id, @RequestParam(required=false) String size) {
+
+        return getCore(id, size, blogThumbnailSupportSizeList, blogThumbnailPath);
+    }
+
+
 
 
     private String writeImageSet(BufferedImage srcImage, int orientation, int [][] supportSizeList, ImageSetWriter setWriter){
@@ -176,95 +251,9 @@ public class BlobController {
     }
 
 
-    @PostMapping("/blob/article/thumbnail")
-    public ResponseEntity<?> postArticleThumbnail(@RequestParam("image") MultipartFile multipartFile){
-
-        if(multipartFile.getSize() > (1000 * 1000 * 10))
-            return new ResponseEntity<>(HttpStatus.CONTENT_TOO_LARGE);
-
-        try {
-
-            final byte [] bytes = multipartFile.getBytes();
-
-            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
-
-            if(srcImage == null)
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-            int orientation = getOrientation(new ByteArrayInputStream(bytes));
-
-            final String id = writeImageSet(srcImage, orientation, articleThumbnailSupportSizeList, articleThumbnailSetWriter);
-
-            if(id == null)
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-            return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
-        }
-        catch (IOException e){
-
-            Log.error(e.toString());
-
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @GetMapping("/blob/article/thumbnail/{id}")
-    public ResponseEntity<?> getArticleThumbnail(@PathVariable String id, @RequestParam(required=false) String size) {
-
-        String [] split = spiltFileName(id);
-
-        if(split == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(!(split.length == 2 && split[1].equals("webp")))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(size == null) //set default size
-            size = articleThumbnailSupportSizeList[0][0] + "x" + articleThumbnailSupportSizeList[0][1];
-
-        if(!isSupportSize(size, articleThumbnailSupportSizeList))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
-
-        final String filePath = articleThumbnailPath + "/" + fileName;
-
-        if(!(new File(filePath)).exists())
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        return createResponse(filePath);
-    }
 
 
-    @GetMapping("/blob/profile/{id}")
-    public ResponseEntity<?> getProfile(@PathVariable String id, @RequestParam(required=false) String size) {
-
-        String [] split = spiltFileName(id);
-
-        if(split == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(!(split.length == 2 && split[1].equals("webp")))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(size == null) //set default size
-            size = profileSupportSizeList[0][0] + "x" + profileSupportSizeList[0][1];
-
-        if(!isSupportSize(size, profileSupportSizeList))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
-
-        final String filePath = profilePath + "/" + fileName;
-
-        if(!(new File(filePath)).exists())
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        return createResponse(filePath);
-    }
-
-
-    private ResponseEntity createResponse(String filePath) {
+    private ResponseEntity<?> createResponse(String filePath) {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("image/webp"));
@@ -284,14 +273,53 @@ public class BlobController {
     }
 
 
-    @GetMapping("/blob/article/{id}")
-    public ResponseEntity<?> getArticle(@PathVariable String id) {
 
-        final String filePath = articleImagePath + "/" + id;
+    private ResponseEntity<?> postMutiSizeCore(byte [] bytes, int [][] supportSizeList, ImageSetWriter setWriter) throws IOException{
+
+        final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
+
+        if(srcImage == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        int orientation = getOrientation(new ByteArrayInputStream(bytes));
+
+        final String id = writeImageSet(srcImage, orientation, supportSizeList, setWriter);
+
+        if(id == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
+    }
+
+
+
+
+    private ResponseEntity<?> getCore(String id, String size, int [][] supportSizeList, String prefixPath){
+
+        String [] split = spiltFileName(id);
+
+        if(split == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!(split.length == 2 && split[1].equals("webp")))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(size == null) //set default size
+            size = supportSizeList[0][0] + "x" + supportSizeList[0][1];
+
+        if(!isSupportSize(size, supportSizeList))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
+
+        final String filePath = prefixPath + "/" + fileName;
 
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         return createResponse(filePath);
     }
+
+
+
 }

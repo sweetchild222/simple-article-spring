@@ -346,7 +346,7 @@ public class DataBaseClient {
         for(int i = 1; i <= metaData.getColumnCount(); i++) {
 
             final int columnType = metaData.getColumnType(i);
-            final String columnName = metaData.getColumnName(i);
+            final String columnName = metaData.getColumnLabel(i);
 
             switch (columnType) {
                 case Types.LONGNVARCHAR:

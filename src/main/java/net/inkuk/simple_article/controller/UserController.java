@@ -23,7 +23,9 @@ public class UserController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
 
-        final String sql = "select username, profile, create_at from user where id = " + userId;
+        String sql = "select u.username, u.profile, u.create_at, b.id as blog_id ";
+        sql += "from user as u inner join blog as b on u.id = b.user_id ";
+        sql += "where u.id = " + userId;
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 

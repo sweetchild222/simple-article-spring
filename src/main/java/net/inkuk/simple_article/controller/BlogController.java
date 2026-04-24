@@ -17,10 +17,10 @@ import java.util.Map;
 public class BlogController {
 
 
-    @GetMapping("/user/{userId}/blog")
-    public ResponseEntity<?> getBlog(@PathVariable long userId) {
+    @GetMapping("/blog/{blogId}")
+    public ResponseEntity<?> getBlog(@PathVariable long blogId) {
 
-        String sql = "select * from blog where user_id=" + userId;
+        String sql = "select * from blog where id=" + blogId;
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 

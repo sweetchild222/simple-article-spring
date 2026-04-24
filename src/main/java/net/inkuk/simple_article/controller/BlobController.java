@@ -131,7 +131,6 @@ public class BlobController {
 
 
 
-
     @PostMapping("/blob/blog/thumbnail")
     public ResponseEntity<?> postBlog(@RequestParam("image") MultipartFile multipartFile){
 
@@ -319,7 +318,4 @@ public class BlobController {
 
         return createResponse(filePath);
     }
-
-
-
 }

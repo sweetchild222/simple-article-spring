@@ -146,51 +146,59 @@ public class UserController {
 
     private @Nullable Map<String, String> payloadToSqlItems(final @NotNull Map<String, Object> payload){
 
-        final Map<String, String> items = new java.util.HashMap<>(Map.of());
+        try {
 
-        final Boolean is_withdraw = (Boolean)payload.get("withdraw");
-        if(is_withdraw != null) {
-            if(!(is_withdraw && payload.size() == 1))
+            final Map<String, String> items = new java.util.HashMap<>(Map.of());
+
+            final Boolean is_withdraw = (Boolean) payload.get("withdraw");
+            if (is_withdraw != null) {
+                if (!(is_withdraw && payload.size() == 1))
+                    return null;
+
+                items.put("withdraw_at", "current_timestamp()");
+                items.put("username", "null");
+                items.put("profile", "null");
+                items.put("password", "null");
+
+                return items;
+            }
+
+            final String password = (String) payload.get("password");
+            if (password != null) {
+
+                if (!validPassword(password))
+                    return null;
+
+                if (payload.size() != 1)
+                    return null;
+
+                items.put("password", "'" + (new BCryptPasswordEncoder()).encode(password) + "'");
+                return items;
+            }
+
+            if (payload.containsKey("profile")) {
+                final String profile = (String) payload.get("profile");
+                items.put("profile", (profile != null ? ("'" + profile + "'") : "null"));
+            }
+
+            final String role = (String) payload.get("role");
+            if (role != null) {
+                if (!Arrays.asList(new String[]{"ADMIN", "USER"}).contains(role.toUpperCase()))
+                    return null;
+
+                items.put("role", "'" + role + "'");
+            }
+
+            if (items.size() != payload.size())
                 return null;
-
-            items.put("withdraw_at", "current_timestamp()");
-            items.put("username", "null");
-            items.put("profile", "null");
-            items.put("password", "null");
 
             return items;
-        }
 
-        final String password = (String)payload.get("password");
-        if(password != null) {
+        } catch (Exception e) {
 
-            if(!validPassword(password))
-                return null;
-
-            if(payload.size() != 1)
-                return null;
-
-            items.put("password", "'" + (new BCryptPasswordEncoder()).encode(password) + "'");
-            return items;
-        }
-
-        if(payload.containsKey("profile")) {
-            final String profile = (String)payload.get("profile");
-            items.put("profile", (profile != null ? ("'" + profile + "'") : "null"));
-        }
-
-        final String role = (String)payload.get("role");
-        if(role != null) {
-            if (!Arrays.asList(new String[]{"ADMIN", "USER"}).contains(role.toUpperCase()))
-                return null;
-
-            items.put("role", "'" + role + "'");
-        }
-
-        if(items.size() != payload.size())
+            Log.error(e.toString());
             return null;
-
-        return items;
+        }
     }
 
 

@@ -68,22 +68,30 @@ public class BlogController {
 
     private @Nullable Map<String, String> payloadToSqlItems(final @NotNull Map<String, Object> payload){
 
-        final Map<String, String> items = new java.util.HashMap<>(Map.of());
+        try {
 
-        final String title = (String)payload.get("title");
+            final Map<String, String> items = new java.util.HashMap<>(Map.of());
 
-        if(title != null)
-            items.put("title", "'" + title + "'");
+            final String title = (String) payload.get("title");
 
-        final String image = (String)payload.get("image");
+            if (title != null)
+                items.put("title", "'" + title + "'");
 
-        if(image != null)
-            items.put("image", "'" + image + "'");
+            final String image = (String) payload.get("image");
 
-        if(items.size() != payload.size())
+            if (image != null)
+                items.put("image", "'" + image + "'");
+
+            if (items.size() != payload.size())
+                return null;
+
+            return items;
+
+        } catch (Exception e) {
+
+            Log.error(e.toString());
             return null;
-
-        return items;
+        }
     }
 
 

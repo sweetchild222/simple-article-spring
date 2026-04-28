@@ -40,9 +40,9 @@ public class BlobController {
     private static final String articleImagePath = "/home/ubuntu/simple/blob/article/image";
     private final MultipartToFile multipartToFile = new MultipartToFile(articleImagePath);
 
-    private static final int[][] blogThumbnailSupportSizeList = {{1024, 768}, {800, 600}, {720, 480}, {640, 480}, {256, 256}, {160, 120}};
-    private static final String blogThumbnailPath = "/home/ubuntu/simple/blob/blog/thumbnail";
-    private final ImageSetWriter blogThumbnailSetWriter = new ImageSetWriter(blogThumbnailPath);
+    private static final int[][] blogImageSupportSizeList = {{1920, 320}, {960, 160}};
+    private static final String blogImagePath = "/home/ubuntu/simple/blob/blog/image";
+    private final ImageSetWriter blogImageSetWriter = new ImageSetWriter(blogImagePath);
 
 
     @PostMapping("/blob/article")
@@ -131,7 +131,7 @@ public class BlobController {
 
 
 
-    @PostMapping("/blob/blog/thumbnail")
+    @PostMapping("/blob/blog/image")
     public ResponseEntity<?> postBlog(@RequestParam("image") MultipartFile multipartFile){
 
         if(multipartFile.getSize() > (1000 * 1000 * 10))
@@ -141,7 +141,7 @@ public class BlobController {
 
             final byte [] bytes = multipartFile.getBytes();
 
-            return postMutiSizeCore(bytes, blogThumbnailSupportSizeList, blogThumbnailSetWriter);
+            return postMutiSizeCore(bytes, blogImageSupportSizeList, blogImageSetWriter);
         }
         catch (IOException e){
 
@@ -152,10 +152,10 @@ public class BlobController {
     }
 
 
-    @GetMapping("/blob/blog/thumbnail/{id}")
+    @GetMapping("/blob/blog/image/{id}")
     public ResponseEntity<?> getBlog(@PathVariable String id, @RequestParam(required=false) String size) {
 
-        return getCore(id, size, blogThumbnailSupportSizeList, blogThumbnailPath);
+        return getCore(id, size, blogImageSupportSizeList, blogImagePath);
     }
 
 

@@ -71,8 +71,6 @@ public class BlobController {
     }
 
 
-
-
     @PostMapping("/blob/profile")
     public ResponseEntity<?> postProfile(@RequestParam("image") MultipartFile multipartFile){
 

@@ -30,6 +30,9 @@ public class BlogController {
         if (map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
+        if(map.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 

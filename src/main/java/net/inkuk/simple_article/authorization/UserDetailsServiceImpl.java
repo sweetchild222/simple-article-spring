@@ -2,6 +2,7 @@ package net.inkuk.simple_article.authorization;
 
 import lombok.RequiredArgsConstructor;
 import net.inkuk.simple_article.database.DataBaseClientPool;
+import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +20,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public @NotNull UserDetails loadUserByUsername(@NotNull String username) {
 
-        final String sql = "select id, username, password, role from user where username = '" + username + "'";
+        String sql = "select u.id, u.username, u.password, u.role, b.id as blog_id ";
+        sql += "from user as u inner join blog as b on u.id=b.user_id ";
+        sql += "where username = '" + username + "'";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
@@ -33,10 +36,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final String name = (String)map.get("username");
         final String password = (String)map.get("password");
         final String authority = (String)map.get("role");
+        final long blogId = (long)map.get("blog_id");
 
         final List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(authority));
 
-        return new SecurityUser(id, name, password, authorities);
+        return new SecurityUser(id, name, password, authorities, blogId);
 
     }
 }

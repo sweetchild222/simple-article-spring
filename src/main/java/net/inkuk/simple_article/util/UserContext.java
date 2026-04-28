@@ -12,7 +12,7 @@ public class UserContext {
         Object object = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 
         if(object instanceof SecurityUser securityUser)
-            return Objects.requireNonNull(securityUser).getID();
+            return Objects.requireNonNull(securityUser).userID();
         else
             return -1;
     }
@@ -22,6 +22,17 @@ public class UserContext {
 
         return userID() == -1;
 
+    }
+
+
+    public static long blogID(){
+
+        Object object = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+
+        if(object instanceof SecurityUser securityUser)
+            return Objects.requireNonNull(securityUser).blogID();
+        else
+            return -1;
     }
 
 

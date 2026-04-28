@@ -52,7 +52,7 @@ public class AuthController {
 
         final String jwt = jwtUtil.generateToken(securityUser.getUsername());
 
-        final Map<String, Object> body = Map.of("jwt", jwt, "user_id", securityUser.getID());
+        final Map<String, Object> body = Map.of("jwt", jwt, "user_id", securityUser.userID(), "blog_id", securityUser.blogID());
 
         return new ResponseEntity<>(body, HttpStatus.OK);
     }

@@ -12,35 +12,43 @@ import java.util.List;
 
 public class SecurityUser implements UserDetails {
 
-    private final long id;
+    private final long userId;
+    private final long blogId;
     private final String username;
     private final String password;
     private final List<GrantedAuthority> authorityList;
 
-    public SecurityUser(long id, String username, String password, List<GrantedAuthority> authorityList) {
+    public SecurityUser(long userId, String username, String password, List<GrantedAuthority> authorityList, long blogId) {
 
-        this.id = id;
+        this.userId = userId;
         this.username = username;
         this.password = password;
         this.authorityList = authorityList;
+        this.blogId = blogId;
     }
 
 
     public static SecurityUser createInvalid(){
 
-        return new SecurityUser(-1, null, null, null);
+        return new SecurityUser(-1, null, null, null, -1);
     }
 
 
     public static SecurityUser createEmpty(){
 
-        return new SecurityUser(0, null, null, null);
+        return new SecurityUser(0, null, null, null, -1);
     }
 
 
-    public long getID(){
+    public long userID(){
 
-        return this.id;
+        return this.userId;
+    }
+
+
+    public long blogID(){
+
+        return this.blogId;
     }
 
     @Override
@@ -52,13 +60,13 @@ public class SecurityUser implements UserDetails {
 
     public boolean isInvalid(){
 
-        return (this.id == -1);
+        return (this.userId == -1);
     }
 
 
     public boolean isEmpty(){
 
-        return (this.id == 0);
+        return (this.userId == 0);
     }
 
 

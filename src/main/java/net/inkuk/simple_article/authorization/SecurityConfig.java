@@ -44,9 +44,9 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/authenticate").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
                         .requestMatchers("/verifyEmail/**").permitAll()
                         .requestMatchers("/user/exist/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/article/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/**").permitAll()

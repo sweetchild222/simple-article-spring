@@ -14,7 +14,7 @@ public class Log {
     private static void infoCore(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-        final StackTraceElement e = stacktrace[2];
+        final StackTraceElement e = stacktrace[3];
         final String methodName = e.getMethodName();
 
         final String log = "<" + methodName + "> " + message;
@@ -67,7 +67,7 @@ public class Log {
     private static void errorCore(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-        final StackTraceElement e = stacktrace[2];
+        final StackTraceElement e = stacktrace[3];
         final String methodName = e.getMethodName();
 
         final String log = "<" + methodName + "> " + message;

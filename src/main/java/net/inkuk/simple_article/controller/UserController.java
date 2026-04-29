@@ -23,7 +23,7 @@ public class UserController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
 
-        String sql = "select u.id as user_id, u.username, u.profile, u.create_at, b.id as blog_id ";
+        String sql = "select u.id as user_id, u.username, u.image, u.create_at, b.id as blog_id ";
         sql += "from user as u inner join blog as b on u.id = b.user_id ";
         sql += "where u.id = " + userId;
 
@@ -119,7 +119,7 @@ public class UserController {
 
         final String username = payload.get("username");
         final String password = payload.get("password");
-        final String profile = payload.get("profile");
+        final String image = payload.get("image");
 
         if(username == null || password == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -157,7 +157,7 @@ public class UserController {
 
                 items.put("withdraw_at", "current_timestamp()");
                 items.put("username", "null");
-                items.put("profile", "null");
+                items.put("image", "null");
                 items.put("password", "null");
 
                 return items;
@@ -176,9 +176,9 @@ public class UserController {
                 return items;
             }
 
-            if (payload.containsKey("profile")) {
-                final String profile = (String) payload.get("profile");
-                items.put("profile", (profile != null ? ("'" + profile + "'") : "null"));
+            if (payload.containsKey("image")) {
+                final String image = (String) payload.get("image");
+                items.put("image", (image != null ? ("'" + image + "'") : "null"));
             }
 
             final String role = (String) payload.get("role");

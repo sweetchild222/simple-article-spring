@@ -20,9 +20,6 @@ public class CategoryController {
     @GetMapping("/user/{userId}/category")
     public ResponseEntity<?> getCategories(@PathVariable long userId, @RequestParam Map<String, String> params) {
 
-        if(userId != UserContext.userID())
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
         final String isDefault = ObjectCovert.asString(params.get("is_default"));
 
         if(!QueryParamChecker.validInteger(isDefault, 0, 1, true))

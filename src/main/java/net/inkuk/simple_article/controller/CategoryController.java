@@ -24,10 +24,13 @@ public class CategoryController {
 
         if(!QueryParamChecker.validInteger(isDefault, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        String sql = "select * from category where user_id=" + userId;
-        sql += isDefault != null ? (" and is_default=" + isDefault) : "";
-        sql += " order by id asc";
+        
+        String sql = "select c.*, count(a.id) as article_count ";
+        sql += "from category as c left outer join article as a on a.category_id = c.id ";
+        sql += "where c.user_id=" + userId + " ";
+        sql += isDefault != null ? ("and c.is_default=" + isDefault + " ") : "";
+        sql += "group by c.id ";
+        sql += "order by c.id asc";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
@@ -71,9 +74,9 @@ public class CategoryController {
         if(name == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "update category set name = '" + name + "'";
-        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID() + " and is_default=0";
 
+        String sql = "update category set name = '" + name + "'";
+        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID();
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
         if(matchCount == -1)
@@ -103,7 +106,7 @@ public class CategoryController {
 
         final String strUserId = String.valueOf(userId);
 
-        final int maxCategory = 10;
+        final int maxCategory = 7;
 
         String sql = "insert ignore into category (name, user_id) ";
         sql += "select '" + name + "', " + strUserId;

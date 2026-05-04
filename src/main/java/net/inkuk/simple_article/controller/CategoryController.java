@@ -24,7 +24,7 @@ public class CategoryController {
 
         if(!QueryParamChecker.validInteger(isDefault, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        
+
         String sql = "select c.*, count(a.id) as article_count ";
         sql += "from category as c left outer join article as a on a.category_id = c.id ";
         sql += "where c.user_id=" + userId + " ";
@@ -106,7 +106,7 @@ public class CategoryController {
 
         final String strUserId = String.valueOf(userId);
 
-        final int maxCategory = 7;
+        final int maxCategory = 5;
 
         String sql = "insert ignore into category (name, user_id) ";
         sql += "select '" + name + "', " + strUserId;

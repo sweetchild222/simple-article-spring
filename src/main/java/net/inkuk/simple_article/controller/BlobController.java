@@ -29,11 +29,11 @@ import java.util.Map;
 @RestController
 public class BlobController {
 
-    private static final int[][] profileSupportSizeList = {{256, 256}, {128, 128}, {64, 64}, {32, 32}};
+    private static final int[][] profileSupportSizeList = {{256, 256}, {128, 128}, {96, 96}, {64, 64}, {48, 48}};
     private static final String profilePath = "/home/ubuntu/simple/blob/profile";
     private final ImageSetWriter profileSetWriter = new ImageSetWriter(profilePath);
 
-    private static final int[][] articleThumbnailSupportSizeList = {{1024, 768}, {800, 600}, {720, 480}, {640, 480}, {256, 256}, {160, 120}};
+    private static final int[][] articleThumbnailSupportSizeList = {{640, 480}, {165, 165}};
     private static final String articleThumbnailPath = "/home/ubuntu/simple/blob/article/thumbnail";
     private final ImageSetWriter articleThumbnailSetWriter = new ImageSetWriter(articleThumbnailPath);
 

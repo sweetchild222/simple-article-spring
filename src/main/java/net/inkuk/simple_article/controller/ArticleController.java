@@ -45,19 +45,19 @@ public class ArticleController {
 
     private static @NotNull String makeSql(String offset, String limit, String order) {
 
-
         final String strPosted = "a.posted=1";
         final String strSourceId = "a.source_id is null";
-        final String strOffset = "offset " + (offset != null ? offset : "0");
-        final String strLimit = "limit " + (limit != null ? limit : "20");
-        final String strGroup = "group by a.id";
+        final String strGroupBy = "group by a.id";
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
+        final String strLimit = "limit " + (limit != null ? limit : "20");
+        final String strOffset = "offset " + (offset != null ? offset : "0");
 
-        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id, count(g.id) as great_count ";
+        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id, count(distinct g.id) as great_count, count(distinct m.id) as comment_count";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
-        sql += "left join article_great as g on a.id = g.article_id where ";
+        sql += "left join article_great as g on a.id = g.article_id ";
+        sql += "left join comment m on a.id = m.article_id where ";
         sql += strPosted + " and " + strSourceId + " ";
-        sql += strGroup + " " + strOrder + " " + strLimit + " " + strOffset;
+        sql += strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
     }
@@ -234,18 +234,19 @@ public class ArticleController {
         final String strPosted = posted != null ? "a.posted=" + (posted.equals("1") ? "1" : "0") : "";
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
         final String strOffset = "offset " + (offset != null ? offset : "0");
+        final String strGroupBy = "group by a.id";
         final String strLimit = "limit " + (limit != null ? limit : "20");
-        final String strGroup = "group by a.id";
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, c.user_id, count(g.id) as great_count ";
+        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, c.user_id, count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
-        sql += "left join article_great as g on a.id = g.article_id where ";
+        sql += "left join article_great as g on a.id = g.article_id ";
+        sql += "left join comment m on a.id = m.article_id where ";
         sql += strUserId;
         sql += strSourceId.isEmpty() ? "" : (" and " + strSourceId);
         sql += strPosted.isEmpty() ? "" : (" and " + strPosted);
         sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);
-        sql += " " + strGroup + " " + strOrder + " " + strLimit + " " + strOffset;
+        sql += " " + strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
     }

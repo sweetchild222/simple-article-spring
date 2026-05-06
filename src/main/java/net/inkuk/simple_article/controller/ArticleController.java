@@ -50,12 +50,14 @@ public class ArticleController {
         final String strSourceId = "a.source_id is null";
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strLimit = "limit " + (limit != null ? limit : "20");
+        final String strGroup = "group by a.id";
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select a.id, a.title, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id ";
-        sql += "from article as a inner join category as c on a.category_id = c.id where ";
+        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id, count(g.id) as great_count ";
+        sql += "from article as a inner join category as c on a.category_id = c.id ";
+        sql += "left join article_great as g on a.id = g.article_id where ";
         sql += strPosted + " and " + strSourceId + " ";
-        sql += strOrder + " " + strLimit + " " + strOffset;
+        sql += strGroup + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
     }
@@ -84,12 +86,13 @@ public class ArticleController {
 
         final String title = ObjectCovert.asString(payload.get("title"));
         final String content = ObjectCovert.asString(payload.get("content"));
+        final String head = ObjectCovert.asString(payload.get("head"));
         final Number posted = ObjectCovert.asNumber(payload.get("posted"));
         final String thumbnail = ObjectCovert.asString(payload.get("thumbnail"));
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
         final Number sourceId = ObjectCovert.asNumber(payload.get("source_id"));
 
-        if(title == null || content == null || posted == null || thumbnail == null || categoryId == null)
+        if(title == null || content == null || posted == null || thumbnail == null || categoryId == null || head == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(sourceId != null && posted.longValue() == 1)
@@ -100,8 +103,8 @@ public class ArticleController {
         final String strUserId = String.valueOf(UserContext.userID());
         final String strSourceId = sourceId != null ? String.valueOf(sourceId) : "null";
 
-        String sql = "insert ignore into article (title, content, posted, thumbnail, category_id, source_id)";
-        sql += " select '" + title + "', '" + content + "', " + strPosted + ", '" + thumbnail + "', " + strCategoryId + ", " + strSourceId;
+        String sql = "insert ignore into article (title, head, content, posted, thumbnail, category_id, source_id)";
+        sql += " select '" + title + "', '" + head + "', '" + content + "', " + strPosted + ", '" + thumbnail + "', " + strCategoryId + ", " + strSourceId;
         sql += " where exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
         sql += sourceId != null ? " and exists " + "(select 1 from article as a inner join category as c on a.category_id = c.id where c.user_id=" + strUserId + " and a.id=" + strSourceId + ")" : "";
 
@@ -121,11 +124,12 @@ public class ArticleController {
 
         final String title = ObjectCovert.asString(payload.get("title"));
         final String content = ObjectCovert.asString(payload.get("content"));
+        final String head = ObjectCovert.asString(payload.get("head"));
         final Number posted = ObjectCovert.asNumber(payload.get("posted"));
         final String thumbnail = ObjectCovert.asString(payload.get("thumbnail"));
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
 
-        if(title == null || content == null || posted == null || thumbnail == null || categoryId == null)
+        if(title == null || content == null || posted == null || thumbnail == null || categoryId == null || head == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
@@ -133,7 +137,7 @@ public class ArticleController {
         final String strCategoryId = String.valueOf(categoryId);
 
         String sql = "update article set ";
-        sql += "title='" + title + "', content='" + content + "'";
+        sql += "title='" + title + "', content='" + content + "', head='" + head + "'";
         sql += ", posted=" + strPosted + ", thumbnail='" + thumbnail +"', category_id=" + strCategoryId;
         sql += " where id=" + articleId;
         sql += " and exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
@@ -231,15 +235,17 @@ public class ArticleController {
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strLimit = "limit " + (limit != null ? limit : "20");
+        final String strGroup = "group by a.id";
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select a.id, a.title, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, c.user_id ";
-        sql += "from article as a inner join category as c on a.category_id = c.id where ";
+        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, c.user_id, count(g.id) as great_count ";
+        sql += "from article as a inner join category as c on a.category_id = c.id ";
+        sql += "left join article_great as g on a.id = g.article_id where ";
         sql += strUserId;
         sql += strSourceId.isEmpty() ? "" : (" and " + strSourceId);
         sql += strPosted.isEmpty() ? "" : (" and " + strPosted);
         sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);
-        sql += " " + strOrder + " " + strLimit + " " + strOffset;
+        sql += " " + strGroup + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
     }

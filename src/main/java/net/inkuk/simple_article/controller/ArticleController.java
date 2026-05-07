@@ -52,7 +52,8 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "20");
         final String strOffset = "offset " + (offset != null ? offset : "0");
 
-        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id, count(distinct g.id) as great_count, count(distinct m.id) as comment_count";
+        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id, ";
+        sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment m on a.id = m.article_id where ";

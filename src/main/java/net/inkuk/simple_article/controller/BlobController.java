@@ -40,7 +40,7 @@ public class BlobController {
     private static final String articleImagePath = "/home/ubuntu/simple/blob/article/image";
     private final MultipartToFile multipartToFile = new MultipartToFile(articleImagePath);
 
-    private static final int[][] blogImageSupportSizeList = {{1920, 320}, {960, 160}};
+    private static final int[][] blogImageSupportSizeList = {{1920, 168}, {960, 84}};
     private static final String blogImagePath = "/home/ubuntu/simple/blob/blog/image";
     private final ImageSetWriter blogImageSetWriter = new ImageSetWriter(blogImagePath);
 

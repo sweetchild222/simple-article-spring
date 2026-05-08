@@ -26,7 +26,7 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (!QueryParamChecker.validInteger(limit, 1, 20, true))
+        if (!QueryParamChecker.validInteger(limit, 1, 100, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
@@ -49,12 +49,13 @@ public class ArticleController {
         final String strSourceId = "a.source_id is null";
         final String strGroupBy = "group by a.id";
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
-        final String strLimit = "limit " + (limit != null ? limit : "20");
+        final String strLimit = "limit " + (limit != null ? limit : "10");
         final String strOffset = "offset " + (offset != null ? offset : "0");
 
-        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, c.user_id, ";
+        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, b.user_id, ";
         sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
+        sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment m on a.id = m.article_id where ";
         sql += strPosted + " and " + strSourceId + " ";
@@ -179,11 +180,10 @@ public class ArticleController {
         }
     }
 
-    @GetMapping("/user/{userId}/article")
-    public ResponseEntity<?> getArticles(@PathVariable long userId, @RequestParam Map<String, String> params) {
+    @GetMapping("/blog/{blogId}/article")
+    public ResponseEntity<?> getArticles(@PathVariable long blogId, @RequestParam Map<String, String> params) {
 
         final String posted = ObjectCovert.asString(params.get("posted"));
-
         final String categoryId = ObjectCovert.asString(params.get("category_id"));
         final String offset = ObjectCovert.asString(params.get("offset"));
         final String limit = ObjectCovert.asString(params.get("limit"));
@@ -199,7 +199,7 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (!QueryParamChecker.validInteger(limit, 1, 20, true))
+        if (!QueryParamChecker.validInteger(limit, 1, 100, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
@@ -211,13 +211,14 @@ public class ArticleController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if(userId != UserContext.userID()) {
+        if(blogId != UserContext.blogID()) {
 
-            if(posted != null || categoryId != null)
+            if(posted != null) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
         }
 
-        final String sql = this.makeSelectSql(String.valueOf(userId), posted, categoryId, offset, limit, order, sourceId);
+        final String sql = this.makeSelectSql(String.valueOf(blogId), posted, categoryId, offset, limit, order, sourceId);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
 
@@ -228,24 +229,26 @@ public class ArticleController {
     }
 
 
-    private @NotNull String makeSelectSql(String userId, String posted, String categoryId, String offset, String limit, String order, String sourceId) {
+    private @NotNull String makeSelectSql(String blogId, String posted, String categoryId, String offset, String limit, String order, String sourceId) {
 
-        final String strUserId = "c.user_id=" + userId;
+        final String strUserId = "b.id=" + blogId;
         final String strSourceId = sourceId != null ? ("a.source_id" + (sourceId.equals("none")  ? " is null" : "=" + sourceId)) : "";
-        final String strPosted = posted != null ? "a.posted=" + (posted.equals("1") ? "1" : "0") : "";
+        final String strPosted = "a.posted=" + (posted != null ? posted : "1");
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strGroupBy = "group by a.id";
-        final String strLimit = "limit " + (limit != null ? limit : "20");
+        final String strLimit = "limit " + (limit != null ? limit : "10");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, c.user_id, count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
+        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, ";
+        sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
+        sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
-        sql += "left join comment m on a.id = m.article_id where ";
-        sql += strUserId;
+        sql += "left join comment as m on a.id = m.article_id ";
+        sql += "where " + strUserId;
         sql += strSourceId.isEmpty() ? "" : (" and " + strSourceId);
-        sql += strPosted.isEmpty() ? "" : (" and " + strPosted);
+        sql += " and " + strPosted;
         sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);
         sql += " " + strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
 

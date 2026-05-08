@@ -17,17 +17,17 @@ import java.util.Map;
 @RestController
 public class CategoryController {
 
-    @GetMapping("/user/{userId}/category")
-    public ResponseEntity<?> getCategories(@PathVariable long userId, @RequestParam Map<String, String> params) {
+    @GetMapping("/blog/{blogId}/category")
+    public ResponseEntity<?> getCategories(@PathVariable long blogId, @RequestParam Map<String, String> params) {
 
         final String isDefault = ObjectCovert.asString(params.get("is_default"));
 
         if(!QueryParamChecker.validInteger(isDefault, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "select c.*, count(a.id) as article_count ";
+        String sql = "select c.*, count(case when a.posted = 1 then 1 end) as article_count ";
         sql += "from category as c left outer join article as a on a.category_id = c.id ";
-        sql += "where c.user_id=" + userId + " ";
+        sql += "where c.blog_id=" + blogId + " ";
         sql += isDefault != null ? ("and c.is_default=" + isDefault + " ") : "";
         sql += "group by c.id ";
         sql += "order by c.id asc";
@@ -45,7 +45,7 @@ public class CategoryController {
     public ResponseEntity<?> deleteCategories(@PathVariable long categoryId) {
 
         String sql = "delete from category where id = " + categoryId;
-        sql += " and user_id = " + UserContext.userID();
+        sql += " and blog_id = " + UserContext.blogID();
         sql += " and not exists " + "(select 1 from article where category_id = " + categoryId + ")";
 
         final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
@@ -74,9 +74,11 @@ public class CategoryController {
         if(name == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(name.length() > 16)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update category set name = '" + name + "'";
-        sql += " where id = " + categoryId  + " and user_id=" + UserContext.userID();
+        sql += " where id = " + categoryId  + " and blog_id=" + UserContext.blogID();
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
         if(matchCount == -1)
@@ -96,21 +98,24 @@ public class CategoryController {
     public ResponseEntity<?> postCategory(@RequestBody @NotNull Map<String, Object> payload) {
 
         final String name = ObjectCovert.asString(payload.get("name"));
-        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
+        final Number blogId = ObjectCovert.asNumber(payload.get("blog_id"));
 
-        if(name == null || userId == null)
+        if(name == null || blogId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(userId.longValue() != UserContext.userID())
+        if(name.length() > 16)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(blogId.longValue() != UserContext.blogID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final String strUserId = String.valueOf(userId);
+        final String strBlogId = String.valueOf(blogId);
 
-        final int maxCategory = 5;
+        final int maxCategory = 10;
 
-        String sql = "insert ignore into category (name, user_id) ";
-        sql += "select '" + name + "', " + strUserId;
-        sql += " where (select count(*) from category where user_id=" + strUserId + ") < " + maxCategory;
+        String sql = "insert ignore into category (name, blog_id) ";
+        sql += "select '" + name + "', " + strBlogId;
+        sql += " where (select count(*) from category where blog_id=" + strBlogId + ") < " + maxCategory;
 
         final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 

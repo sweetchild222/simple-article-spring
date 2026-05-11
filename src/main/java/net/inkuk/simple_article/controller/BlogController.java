@@ -77,13 +77,23 @@ public class BlogController {
 
             final String title = (String) payload.get("title");
 
-            if (title != null)
+            if (title != null) {
+
+                if(title.length() > 256)
+                    return null;
+
                 items.put("title", "'" + title + "'");
+            }
 
             final String image = (String) payload.get("image");
 
-            if (image != null)
+            if (image != null) {
+
+                if(image.length() > 512)
+                    return null;
+
                 items.put("image", "'" + image + "'");
+            }
 
             if (items.size() != payload.size())
                 return null;

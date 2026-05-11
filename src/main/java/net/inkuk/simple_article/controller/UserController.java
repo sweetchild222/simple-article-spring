@@ -158,6 +158,7 @@ public class UserController {
                 items.put("username", "null");
                 items.put("image", "null");
                 items.put("password", "null");
+                items.put("nickname", "null");
 
                 return items;
             }
@@ -177,12 +178,20 @@ public class UserController {
 
             if (payload.containsKey("image")) {
                 final String image = (String) payload.get("image");
+
+                if(image.length() > 512)
+                    return null;
+
                 items.put("image", (image != null ? ("'" + image + "'") : "null"));
             }
 
 
             if (payload.containsKey("nickname")) {
                 final String nickname = (String) payload.get("nickname");
+
+                if(nickname.length() > 50)
+                    return null;
+
                 items.put("nickname", (nickname != null ? ("'" + nickname + "'") : "null"));
             }
 

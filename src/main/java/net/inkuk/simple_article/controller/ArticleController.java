@@ -100,6 +100,18 @@ public class ArticleController {
         if(sourceId != null && posted.longValue() == 1)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(title.length() > 256)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(content.length() > 65535)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(head.length() > 256)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(thumbnail.length() > 512)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
         final String strCategoryId = String.valueOf(categoryId);
         final String strUserId = String.valueOf(UserContext.userID());
@@ -132,6 +144,18 @@ public class ArticleController {
         final Number categoryId = ObjectCovert.asNumber(payload.get("category_id"));
 
         if(title == null || content == null || posted == null || thumbnail == null || categoryId == null || head == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(title.length() > 256)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(content.length() > 65535)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(head.length() > 256)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(thumbnail.length() > 512)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");

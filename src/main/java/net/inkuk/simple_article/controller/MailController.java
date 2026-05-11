@@ -59,11 +59,12 @@ public class MailController {
     @PostMapping("/verifyEmail")
     public ResponseEntity<?> postVerifyEmail(@RequestBody @NotNull Map<String, String> payload) {
 
-        Log.debug("asdffasd");
-
         final String email = payload.get("email");
 
         if(email == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(email.length() > 2000)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final long code = createCode();

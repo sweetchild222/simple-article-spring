@@ -49,7 +49,7 @@ public class ArticleController {
         final String strSourceId = "a.source_id is null";
         final String strGroupBy = "group by a.id";
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
-        final String strLimit = "limit " + (limit != null ? limit : "10");
+        final String strLimit = "limit " + (limit != null ? limit : "100");
         final String strOffset = "offset " + (offset != null ? offset : "0");
 
         String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, b.user_id, ";
@@ -114,13 +114,15 @@ public class ArticleController {
 
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
         final String strCategoryId = String.valueOf(categoryId);
-        final String strUserId = String.valueOf(UserContext.userID());
+        final String strBlogId = String.valueOf(UserContext.blogID());
         final String strSourceId = sourceId != null ? String.valueOf(sourceId) : "null";
+        final int maxNotPostedCount = 10;
 
         String sql = "insert ignore into article (title, head, content, posted, thumbnail, category_id, source_id)";
         sql += " select '" + title + "', '" + head + "', '" + content + "', " + strPosted + ", '" + thumbnail + "', " + strCategoryId + ", " + strSourceId;
-        sql += " where exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
-        sql += sourceId != null ? " and exists " + "(select 1 from article as a inner join category as c on a.category_id = c.id where c.user_id=" + strUserId + " and a.id=" + strSourceId + ")" : "";
+        sql += " where (exists " + "(select 1 from category where id=" +  strCategoryId + " and blog_id=" + strBlogId + "))";
+        sql += " and (select count(a.id) from article as a inner join category as c on c.id = a.category_id where posted=0 and c.blog_id=" + strBlogId + ") < " + maxNotPostedCount;
+        sql += sourceId != null ? " and exists " + "(select 1 from article as a inner join category as c on a.category_id = c.id where c.blog_id=" + strBlogId + " and a.id=" + strSourceId + ")" : "";
 
         final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
 
@@ -159,14 +161,14 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
-        final String strUserId = String.valueOf(UserContext.userID());
+        final String strBlogId = String.valueOf(UserContext.blogID());
         final String strCategoryId = String.valueOf(categoryId);
 
         String sql = "update article set ";
         sql += "title='" + title + "', content='" + content + "', head='" + head + "'";
         sql += ", posted=" + strPosted + ", thumbnail='" + thumbnail +"', category_id=" + strCategoryId;
         sql += " where id=" + articleId;
-        sql += " and exists " + "(select 1 from category where id=" +  strCategoryId + " and user_id=" + strUserId + ")";
+        sql += " and exists " + "(select 1 from category where id=" +  strCategoryId + " and blog_id=" + strBlogId + ")";
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
@@ -188,7 +190,7 @@ public class ArticleController {
 
         String sql = "delete a from article as a inner join category as c on a.category_id = c.id";
         sql += " where a.id=" + articleId;
-        sql += (UserContext.isAdmin() ? "" : " and c.user_id=" + UserContext.userID());
+        sql += (UserContext.isAdmin() ? "" : " and c.blog_id=" + UserContext.blogID());
 
         final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
@@ -261,7 +263,7 @@ public class ArticleController {
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strGroupBy = "group by a.id";
-        final String strLimit = "limit " + (limit != null ? limit : "10");
+        final String strLimit = "limit " + (limit != null ? limit : "100");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, ";

@@ -52,7 +52,7 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "100");
         final String strOffset = "offset " + (offset != null ? offset : "0");
 
-        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, b.user_id, ";
+        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.update_at, a.category_id, b.user_id, c.blog_id, ";
         sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
         sql += "inner join blog as b on c.blog_id = b.id ";
@@ -68,8 +68,12 @@ public class ArticleController {
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getArticle(@PathVariable long articleId) {
 
-        String sql = "select a.*, c.user_id as user_id from article as a inner join category as c on a.category_id = c.id where a.id=" + articleId;
-        sql += " and (a.posted=1 or (c.user_id = " + UserContext.userID() + "))";
+        String sql = "select a.*, c.blog_id as blog_id, count(distinct g.id) as great_count, count(distinct m.id) as comment_count from article as a ";
+        sql += "inner join category as c on a.category_id = c.id ";
+        sql += "left join article_great as g on a.id = g.article_id ";
+        sql += "left join comment m on a.id = m.article_id ";
+        sql += "where a.id=" + articleId + " ";
+        sql += "and (a.posted=1 or (c.blog_id = " + UserContext.blogID() + "))";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
@@ -266,7 +270,7 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "100");
         final String strOrder = "order by create_at " + (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
 
-        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, ";
+        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
         sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
         sql += "inner join blog as b on c.blog_id = b.id ";

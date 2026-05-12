@@ -33,7 +33,7 @@ public class BlobController {
     private static final String profilePath = "/home/ubuntu/simple/blob/profile";
     private final ImageSetWriter profileSetWriter = new ImageSetWriter(profilePath);
 
-    private static final int[][] articleThumbnailSupportSizeList = {{640, 640}, {170, 170}};
+    private static final int[][] articleThumbnailSupportSizeList = {{960, 960}, {960, 540}, {540, 960}, {170, 170}};
     private static final String articleThumbnailPath = "/home/ubuntu/simple/blob/article/thumbnail";
     private final ImageSetWriter articleThumbnailSetWriter = new ImageSetWriter(articleThumbnailPath);
 

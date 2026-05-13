@@ -25,7 +25,7 @@ public class UserController {
 
         String sql = "select u.id as user_id, u.username, u.image, u.nickname, u.create_at, b.id as blog_id ";
         sql += "from user as u inner join blog as b on u.id = b.user_id ";
-        sql += "where u.id = " + userId;
+        sql += "where u.id = " + userId + " and withdraw_at is null";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
 
@@ -52,7 +52,7 @@ public class UserController {
         if(ids.length > 1000)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        StringBuilder sqlBuilder = new StringBuilder("select * from user where ");
+        StringBuilder sqlBuilder = new StringBuilder("select * from user where withdraw_at is null and ");
 
         int count = ids.length;
 

@@ -345,7 +345,7 @@ public class ArticleController {
 
         final String sql = this.makeSelectSql(String.valueOf(blogId), posted, categoryId, offset, limit, order, sourceId);
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.blogID()).selectRows(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -8,7 +8,6 @@ import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.web.LogoutDsl;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +31,7 @@ public class CategoryController {
         sql += "group by c.id ";
         sql += "order by c.id asc";
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 
         if (list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -117,7 +116,7 @@ public class CategoryController {
         sql += "select '" + name + "', " + strBlogId;
         sql += " where (select count(*) from category where blog_id=" + strBlogId + ") < " + maxCategory;
 
-        final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
+        final long id = DataBaseClientPool.getClient(UserContext.userID()).insertRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

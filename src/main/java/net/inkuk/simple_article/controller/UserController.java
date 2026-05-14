@@ -2,7 +2,6 @@ package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
-import net.inkuk.simple_article.util.ObjectCovert;
 import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +26,7 @@ public class UserController {
         sql += "from user as u inner join blog as b on u.id = b.user_id ";
         sql += "where u.id = " + userId + " and withdraw_at is null";
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 
         if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -67,7 +66,7 @@ public class UserController {
 
         final String sql = sqlBuilder.toString();
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -82,7 +81,7 @@ public class UserController {
 
         final String sql = "select count(*) > 0 as exist from user where username = '" + username + "'";
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 
         if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -132,7 +131,7 @@ public class UserController {
         sql += "where not exists ";
         sql += "(select 1 from user where username = '" + username + "')";
 
-        final long id = DataBaseClientPool.getClient().postRow(sql);
+        final long id = DataBaseClientPool.getClient().insertRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -225,7 +224,7 @@ public class UserController {
 
         final String sql = "select password from user where id=" + String.valueOf(userId);
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 
         if(map == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

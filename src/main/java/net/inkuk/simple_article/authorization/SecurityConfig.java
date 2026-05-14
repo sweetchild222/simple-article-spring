@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.GetMapping;
 //import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
@@ -48,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers("/user/exist/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/article/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/article/{articleId}/showed").permitAll()
+                        .requestMatchers("/article/great/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/blog/**").permitAll()

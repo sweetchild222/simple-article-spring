@@ -21,7 +21,7 @@ public class CommentController {
         String sql = "select * from comment where article_id=" + articleId;
         sql += " order by create_at asc";
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().getRows(sql);
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -74,7 +74,7 @@ public class CommentController {
         sql += " where exists " + "(select 1 from article where id=" +  strArticleId + ")";
         sql += commentId != null ? " and exists (select 1 from comment where id=" + strCommentId + ")" : "";
 
-        final long id = DataBaseClientPool.getClient(UserContext.userID()).postRow(sql);
+        final long id = DataBaseClientPool.getClient(UserContext.userID()).insertRow(sql);
 
         if(id == -1)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

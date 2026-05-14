@@ -2,7 +2,6 @@ package net.inkuk.simple_article.database;
 
 import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Component;
 //import org.apache.tomcat.jdbc.pool.DataSource;
 
 import java.sql.*;
@@ -100,7 +99,7 @@ public class DataBaseClient {
     }
 
 
-    public Map<String, Object> getRow(String sql) {
+    public Map<String, Object> selectRow(String sql) {
 
         Log.info(sql);
 
@@ -120,7 +119,7 @@ public class DataBaseClient {
     }
 
 
-    public List<Map<String, Object>> getRows(String sql) {
+    public List<Map<String, Object>> selectRows(String sql) {
 
         Log.info(sql);
 
@@ -141,7 +140,7 @@ public class DataBaseClient {
 
 
 
-    public long postRow(String sql) {
+    public long insertRow(String sql) {
 
         Log.info(sql);
 

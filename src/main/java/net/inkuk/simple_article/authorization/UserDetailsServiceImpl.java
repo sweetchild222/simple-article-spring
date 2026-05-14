@@ -2,7 +2,6 @@ package net.inkuk.simple_article.authorization;
 
 import lombok.RequiredArgsConstructor;
 import net.inkuk.simple_article.database.DataBaseClientPool;
-import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         sql += "from user as u inner join blog as b on u.id=b.user_id ";
         sql += "where username = '" + username + "'";
 
-        final Map<String, Object> map = DataBaseClientPool.getClient().getRow(sql);
+        final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 
         if(map == null)
             return SecurityUser.createInvalid();

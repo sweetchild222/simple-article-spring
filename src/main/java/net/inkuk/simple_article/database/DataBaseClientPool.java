@@ -20,7 +20,10 @@ public class DataBaseClientPool {
         if(instance == null)
             instance = createInstance();
 
-        return instance.clientArray[(int)(userId % (instance.clientCount - 1))];
+        if(userId >= 0)
+            return instance.clientArray[(int)(userId % (instance.clientCount - 1))];
+        else
+            return instance.clientArray[instance.clientCount - 1];
     }
 
 

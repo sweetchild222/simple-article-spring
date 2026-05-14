@@ -23,7 +23,7 @@ public class UserController {
     public ResponseEntity<?> getUser(@PathVariable long userId) {
 
         String sql = "select u.id as user_id, u.username, u.image, u.nickname, u.create_at, b.id as blog_id ";
-        sql += "from user as u inner join blog as b on u.id = b.user_id ";
+        sql += "from user as u left outer join blog as b on u.id = b.user_id ";
         sql += "where u.id = " + userId + " and withdraw_at is null";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
@@ -155,9 +155,9 @@ public class UserController {
 
                 items.put("withdraw_at", "current_timestamp()");
                 items.put("username", "null");
-                items.put("image", "null");
+                items.put("image", "''");
                 items.put("password", "null");
-                items.put("nickname", "null");
+                items.put("nickname", "''");
 
                 return items;
             }
@@ -181,7 +181,7 @@ public class UserController {
                 if(image.length() > 512)
                     return null;
 
-                items.put("image", (image != null ? ("'" + image + "'") : "null"));
+                items.put("image", (image != null ? ("'" + image + "'") : ""));
             }
 
 
@@ -191,7 +191,7 @@ public class UserController {
                 if(nickname.length() > 50)
                     return null;
 
-                items.put("nickname", (nickname != null ? ("'" + nickname + "'") : "null"));
+                items.put("nickname", (nickname != null ? ("'" + nickname + "'") : "''"));
             }
 
             final String role = (String) payload.get("role");

@@ -17,17 +17,12 @@ import java.util.Map;
 public class CategoryController {
 
     @GetMapping("/blog/{blogId}/category")
-    public ResponseEntity<?> getCategories(@PathVariable long blogId, @RequestParam Map<String, String> params) {
+    public ResponseEntity<?> getCategories(@PathVariable long blogId) {
 
-        final String isDefault = ObjectCovert.asString(params.get("is_default"));
-
-        if(!QueryParamChecker.validInteger(isDefault, 0, 1, true))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "select c.*, count(case when a.posted = 1 then 1 end) as article_count ";
         sql += "from category as c left outer join article as a on a.category_id = c.id ";
         sql += "where c.blog_id=" + blogId + " ";
-        sql += isDefault != null ? ("and c.is_default=" + isDefault + " ") : "";
         sql += "group by c.id ";
         sql += "order by c.id asc";
 

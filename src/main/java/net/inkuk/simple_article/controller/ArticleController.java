@@ -165,8 +165,7 @@ public class ArticleController {
     public ResponseEntity<?> deleteArticleGreat(@PathVariable long greatId) {
 
         String sql = "delete g from article_great as g ";
-        sql += "where g.id=" + greatId;
-        sql += (UserContext.isAdmin() ? "" : " and g.user_id=" + UserContext.userID());
+        sql += ("where g.id=" + greatId + " and g.user_id=" + UserContext.userID());
 
         final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
@@ -287,9 +286,9 @@ public class ArticleController {
     @DeleteMapping("/article/{articleId}")
     public ResponseEntity<?> deleteArticle(@PathVariable long articleId) {
 
-        String sql = "delete a from article as a inner join category as c on a.category_id = c.id";
-        sql += " where a.id=" + articleId;
-        sql += (UserContext.isAdmin() ? "" : " and c.blog_id=" + UserContext.blogID());
+        String sql = "delete a from article as a inner join category as c on a.category_id = c.id ";
+        sql += ("where a.id=" + articleId + " and c.blog_id=" + UserContext.blogID());
+
 
         final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 

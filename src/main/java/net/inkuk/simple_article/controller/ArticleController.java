@@ -55,7 +55,7 @@ public class ArticleController {
         final String strOrder = "order by a.post_at " + orderDirection + ", a.update_at " + orderDirection + ", a.create_at " + orderDirection;
 
         String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.post_at, a.update_at, a.category_id, b.user_id, c.blog_id, ";
-        sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
+        sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
         sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
@@ -70,7 +70,9 @@ public class ArticleController {
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getArticle(@PathVariable long articleId) {
 
-        String sql = "select a.*, c.blog_id as blog_id, count(distinct g.id) as great_count, count(distinct m.id) as comment_count from article as a ";
+        String sql = "select a.*, c.blog_id as blog_id, count(distinct m.id) as comment_count, ";
+        sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count ";
+        sql += "from article as a ";
         sql += "inner join category as c on a.category_id = c.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment m on a.id = m.article_id ";
@@ -160,76 +162,6 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    @DeleteMapping("/article/great/{greatId}")
-    public ResponseEntity<?> deleteArticleGreat(@PathVariable long greatId) {
-
-        String sql = "delete g from article_great as g ";
-        sql += ("where g.id=" + greatId + " and g.user_id=" + UserContext.userID());
-
-        final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
-
-        if (affectCount == -1)
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        else if (affectCount == 0)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else if (affectCount == 1)
-            return new ResponseEntity<>(HttpStatus.OK);
-        else {
-            Log.error("Unexcepted affect count: " + affectCount);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/article/great")
-    public ResponseEntity<?> getArticleGreat(@RequestParam Map<String, String> params) {
-
-        final String userId = ObjectCovert.asString(params.get("user_id"));
-        final String articleId = ObjectCovert.asString(params.get("article_id"));
-
-        if(!QueryParamChecker.validInteger(userId, 0, null, false))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        if(!QueryParamChecker.validInteger(articleId, 0, null, false))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        String sql = "select * from article_great ";
-        sql +=  "where user_id=" + userId + " and article_id=" + articleId;
-
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
-
-        if(list == null)
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        return new ResponseEntity<>(list, HttpStatus.OK);
-    }
-
-
-
-    @PostMapping("/article/great")
-    public ResponseEntity<?> postGreat(@RequestBody @NotNull Map<String, Object> payload) {
-
-        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
-        final Number articleId = ObjectCovert.asNumber(payload.get("article_id"));
-
-        if(userId == null || articleId == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        String sql = "insert ignore into article_great (user_id, article_id) ";
-        sql += "select " + userId + ", " + articleId + " ";
-        sql += "where not exists ";
-        sql += "(select 1 from article_great where user_id=" + userId + " and article_id=" + articleId + ")";
-
-        final long id = DataBaseClientPool.getClient(UserContext.userID()).insertRow(sql);
-
-        if(id == -1)
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        else if(id == 0)
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        else
-            return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
-    }
-
 
 
     @PutMapping("/article/{articleId}")
@@ -365,8 +297,9 @@ public class ArticleController {
         final String orderDirection = (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
         final String strOrder = "order by a.post_at " + orderDirection + ", a.update_at " + orderDirection + ", a.create_at " + orderDirection;
 
+
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
-        sql += "count(distinct g.id) as great_count, count(distinct m.id) as comment_count ";
+        sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count ";
         sql += "from article as a inner join category as c on a.category_id = c.id ";
         sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";

@@ -51,6 +51,36 @@ public class CommentController {
     }
 
 
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<?> putComment(@PathVariable long commentId, @RequestBody @NotNull Map<String, Object> payload) {
+
+        final String comment = ObjectCovert.asString(payload.get("comment"));
+
+        if(comment == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(comment.length() > 1000)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String sql = "update comment set ";
+        sql += "comment='" + comment + "' ";
+        sql += "where id=" + commentId + " and user_id=" + UserContext.userID();
+
+        final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+
+        if(matchCount == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(matchCount == 0)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else if(matchCount == 1)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else {
+            Log.error("Unexcepted affect count: " + matchCount);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     @PostMapping("/comment")
     public ResponseEntity<?> postComment(@RequestBody @NotNull Map<String, Object> payload) {
 

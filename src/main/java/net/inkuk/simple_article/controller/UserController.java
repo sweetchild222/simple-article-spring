@@ -51,7 +51,7 @@ public class UserController {
         if(ids.length > 1000)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        StringBuilder sqlBuilder = new StringBuilder("select * from user where withdraw_at is null and ");
+        StringBuilder sqlBuilder = new StringBuilder("select id, image, nickname, role from user where withdraw_at is null and ");
 
         int count = ids.length;
 

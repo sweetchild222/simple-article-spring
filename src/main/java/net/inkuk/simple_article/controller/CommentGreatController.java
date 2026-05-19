@@ -14,23 +14,22 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class ArticleGreatController {
+public class CommentGreatController {
 
-
-    @GetMapping("/article/great")
-    public ResponseEntity<?> getArticleGreat(@RequestParam Map<String, String> params) {
+    @GetMapping("/comment/great")
+    public ResponseEntity<?> getCommentGreat(@RequestParam Map<String, String> params) {
 
         final String userId = ObjectCovert.asString(params.get("user_id"));
-        final String articleId = ObjectCovert.asString(params.get("article_id"));
+        final String commentId = ObjectCovert.asString(params.get("comment_id"));
 
         if(!QueryParamChecker.validInteger(userId, 0, null, false))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!QueryParamChecker.validInteger(articleId, 0, null, false))
+        if(!QueryParamChecker.validInteger(commentId, 0, null, false))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "select * from article_great ";
-        sql +=  "where user_id=" + userId + " and article_id=" + articleId;
+        String sql = "select * from comment_great ";
+        sql +=  "where user_id=" + userId + " and comment_id=" + commentId;
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
@@ -40,20 +39,20 @@ public class ArticleGreatController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @PostMapping("/article/great")
-    public ResponseEntity<?> postArticleGreat(@RequestBody @NotNull Map<String, Object> payload) {
+    @PostMapping("/comment/great")
+    public ResponseEntity<?> postCommentGreat(@RequestBody @NotNull Map<String, Object> payload) {
 
         final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
-        final Number articleId = ObjectCovert.asNumber(payload.get("article_id"));
+        final Number commentId = ObjectCovert.asNumber(payload.get("comment_id"));
         final Number great = ObjectCovert.asNumber(payload.get("great"));
 
-        if(userId == null || articleId == null)
+        if(userId == null || commentId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "insert ignore into article_great (user_id, article_id, great) ";
-        sql += "select " + userId + ", " + articleId + ", "  + great + " ";
+        String sql = "insert ignore into comment_great (user_id, comment_id, great) ";
+        sql += "select " + userId + ", " + commentId + ", "  + great + " ";
         sql += "where not exists ";
-        sql += "(select 1 from article_great where user_id=" + userId + " and article_id=" + articleId + ")";
+        sql += "(select 1 from comment_great where user_id=" + userId + " and comment_id=" + commentId + ")";
 
         final long id = DataBaseClientPool.getClient(UserContext.userID()).insertRow(sql);
 
@@ -66,8 +65,8 @@ public class ArticleGreatController {
     }
 
 
-    @PatchMapping("/article/great/{greatId}")
-    public ResponseEntity<?> patchArticleGreat(@PathVariable long greatId, @RequestBody Map<String, Object> payload) {
+    @PatchMapping("/comment/great/{greatId}")
+    public ResponseEntity<?> patchCommentGreat(@PathVariable long greatId, @RequestBody Map<String, Object> payload) {
 
         if(payload.isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -80,7 +79,7 @@ public class ArticleGreatController {
         if(!(great.equals(-1)  || great.equals(1)))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "update article_great set great = '" + great + "'";
+        String sql = "update comment_great set great = '" + great + "'";
         sql += " where id = " + greatId  + " and user_id=" + UserContext.userID();
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
@@ -97,11 +96,12 @@ public class ArticleGreatController {
         }
     }
 
-    @DeleteMapping("/article/great/{greatId}")
-    public ResponseEntity<?> deleteArticleGreat(@PathVariable long greatId) {
 
-        String sql = "delete g from article_great as g ";
-        sql += ("where g.id=" + greatId + " and g.user_id=" + UserContext.userID());
+    @DeleteMapping("/comment/great/{commentId}")
+    public ResponseEntity<?> deleteCommentGreat(@PathVariable long commentId) {
+
+        String sql = "delete g from comment_great as g ";
+        sql += ("where g.id=" + commentId + " and g.user_id=" + UserContext.userID());
 
         final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
@@ -116,5 +116,4 @@ public class ArticleGreatController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

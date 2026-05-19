@@ -18,8 +18,14 @@ public class CommentController {
     @GetMapping("/article/{articleId}/comment")
     public ResponseEntity<?> getArticleComment(@PathVariable long articleId) {
 
-        String sql = "select * from comment where article_id=" + articleId;
-        sql += " order by create_at asc";
+        final String strArticleId = "c.article_id=" + articleId;
+        final String strOrder = "order by like_count desc, c.create_at asc";
+        final String strGroup = "group by c.id";
+
+        String sql = "select c.*, count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count ";
+        sql += "from comment as c left join comment_great as g on c.id = g.comment_id ";
+        sql += "where " + strArticleId + " ";
+        sql += strGroup + " " + strOrder;
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 

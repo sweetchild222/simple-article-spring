@@ -29,7 +29,7 @@ import java.util.Map;
 @RestController
 public class BlobController {
 
-    private static final int[][] profileSupportSizeList = {{256, 256}, {128, 128}, {96, 96}, {64, 64}, {48, 48}};
+    private static final int[][] profileSupportSizeList = {{256, 256}, {128, 128}, {96, 96}, {64, 64}, {48, 48}, {32, 32}, {24, 24}};
     private static final String profilePath = "/home/ubuntu/simple/blob/profile";
     private final ImageSetWriter profileSetWriter = new ImageSetWriter(profilePath);
 

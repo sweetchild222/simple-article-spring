@@ -98,6 +98,9 @@ public class CommentController {
         if(comment == null || userId == null || articleId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(comment.length() > 1000)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         if(userId.longValue() != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 

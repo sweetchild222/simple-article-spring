@@ -357,7 +357,8 @@ public class DataBaseClient {
                 }
 
                 case Types.TIMESTAMP: {
-                    Timestamp value = resultSet.getTimestamp(i);
+                    Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    Timestamp value = resultSet.getTimestamp(i, utcCalendar);
                     map.put(columnName, resultSet.wasNull() ? null : value.getTime());
                     break;
                 }

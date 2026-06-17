@@ -23,16 +23,16 @@ public class ImageSetWriter {
 
     public String write(BufferedImage[] imageSet) {
 
-        String path = createFolder();
+        final String id = generateID();
+
+        String path = createFolder(id);
 
         if(path == null)
             return null;
 
-        final String id = generateID();
-
         for(BufferedImage image : imageSet) {
 
-            final String fileName = id + "_" + image.getWidth() + "x" + image.getHeight() + ".webp";
+            final String fileName = image.getWidth() + "x" + image.getHeight() + ".webp";
 
             final String filePath = path + "/" + fileName;
 
@@ -54,16 +54,18 @@ public class ImageSetWriter {
     }
 
 
-    private String createFolder(){
+    private String createFolder(String id){
 
-        Path directoryPath = Paths.get(this.path);
+        Path directoryPath = Paths.get(this.path + "/" + id);
 
         try {
 
-            if(!Files.exists(directoryPath))
+            if(!Files.exists(directoryPath)) {
                 Files.createDirectories(directoryPath);
+                return directoryPath.toAbsolutePath().toString();
+            }
 
-            return directoryPath.toAbsolutePath().toString();
+            return null;
 
         }catch(IOException e) {
 

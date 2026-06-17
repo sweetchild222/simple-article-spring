@@ -307,10 +307,10 @@ public class BlobController {
         if(!isSupportSize(size, supportSizeList))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final String fileName = split[0] + "_" + size.toLowerCase() + "." + split[1];
+        final String fileName = size.toLowerCase() + "." + split[1];
 
-        final String filePath = prefixPath + "/" + fileName;
-
+        final String filePath = prefixPath + "/" + split[0] + "/" + fileName;
+        
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 

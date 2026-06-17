@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/verifyEmail/**").permitAll()
                         .requestMatchers("/user/exist/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/article/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/article/{articleId}/showed").permitAll()
                         .requestMatchers("/article/great/**").authenticated()

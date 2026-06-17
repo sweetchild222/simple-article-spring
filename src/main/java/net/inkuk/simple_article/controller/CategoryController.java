@@ -16,9 +16,26 @@ import java.util.Map;
 @RestController
 public class CategoryController {
 
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<?> getCategory(@PathVariable long categoryId) {
+
+        String sql = "select c.* from category as c ";
+        sql += "where c.id=" + categoryId;
+
+        final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
+
+        if(map == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        if(map.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+
     @GetMapping("/blog/{blogId}/category")
     public ResponseEntity<?> getCategories(@PathVariable long blogId) {
-
 
         String sql = "select c.*, count(case when a.posted = 1 then 1 end) as article_count ";
         sql += "from category as c left outer join article as a on a.category_id = c.id ";

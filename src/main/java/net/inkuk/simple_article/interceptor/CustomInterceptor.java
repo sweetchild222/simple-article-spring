@@ -31,7 +31,10 @@ public class CustomInterceptor implements HandlerInterceptor {
         String sessionId = request.getSession().getId();
         String status = String.valueOf(response.getStatus());
 
-        Log.info(status + " {" + sessionId + "}");
+        if(status.equals("200"))
+            Log.info(status + " {" + sessionId + "}");
+        else
+            Log.error(status + " {" + sessionId + "}");
     }
 
     @Override
@@ -40,7 +43,10 @@ public class CustomInterceptor implements HandlerInterceptor {
         String sessionId = request.getSession().getId();
         String status = String.valueOf(response.getStatus());
 
-        Log.info(status + " {" + sessionId + "}");
+        if(status.equals("200"))
+            Log.info(status + " {" + sessionId + "}");
+        else
+            Log.error(status + " {" + sessionId + "}");
 
         if(ex != null)
             Log.error(ex.toString());

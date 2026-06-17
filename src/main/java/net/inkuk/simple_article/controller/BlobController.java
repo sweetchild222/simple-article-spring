@@ -310,7 +310,7 @@ public class BlobController {
         final String fileName = size.toLowerCase() + "." + split[1];
 
         final String filePath = prefixPath + "/" + split[0] + "/" + fileName;
-        
+
         if(!(new File(filePath)).exists())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 

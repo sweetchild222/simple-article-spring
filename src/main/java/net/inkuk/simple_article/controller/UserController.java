@@ -118,16 +118,26 @@ public class UserController {
 
         final String username = payload.get("username");
         final String password = payload.get("password");
+        final String image = payload.get("image");
+        final String nickname = payload.get("nickname");
 
-        if(username == null || password == null)
+        if(username == null || password == null || image == null || nickname == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(!(validPassword(password) && validUsername(username)))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "insert ignore into user (username, password) select ";
+        if(image.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(nickname.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String sql = "insert ignore into user (username, password, image, nickname) select ";
         sql += "'" + username + "', ";
-        sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "' ";
+        sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "', ";
+        sql += "'" + image + "', ";
+        sql += "'" + nickname + "' ";
         sql += "where not exists ";
         sql += "(select 1 from user where username = '" + username + "')";
 

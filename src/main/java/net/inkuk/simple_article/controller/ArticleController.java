@@ -245,6 +245,8 @@ public class ArticleController {
         final String limit = ObjectCovert.asString(params.get("limit"));
         final String order = ObjectCovert.asString(params.get("order"));
         final String sourceId = ObjectCovert.asString(params.get("source_id"));
+        final String minArticleId = ObjectCovert.asString(params.get("min_article_id"));
+        final String maxArticleId = ObjectCovert.asString(params.get("max_article_id"));
 
         if(!QueryParamChecker.validInteger(posted, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -261,6 +263,12 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if (!QueryParamChecker.validInteger(minArticleId, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (!QueryParamChecker.validInteger(maxArticleId, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         if (!QueryParamChecker.validInteger(sourceId, 0, null, true)) {
 
             if(!sourceId.equals("none"))
@@ -269,12 +277,11 @@ public class ArticleController {
 
         if(blogId != UserContext.blogID()) {
 
-            if(posted != null) {
+            if(posted != null)
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
         }
 
-        final String sql = this.makeSelectSql(String.valueOf(blogId), posted, categoryId, offset, limit, order, sourceId);
+        final String sql = this.makeSelectSql(String.valueOf(blogId), posted, categoryId, minArticleId, maxArticleId, offset, limit, order, sourceId);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
@@ -285,12 +292,14 @@ public class ArticleController {
     }
 
 
-    private @NotNull String makeSelectSql(String blogId, String posted, String categoryId, String offset, String limit, String order, String sourceId) {
+    private @NotNull String makeSelectSql(String blogId, String posted, String categoryId, String minArticleId, String maxArticleId, String offset, String limit, String order, String sourceId) {
 
-        final String strUserId = "b.id=" + blogId;
-        final String strSourceId = sourceId != null ? ("a.source_id" + (sourceId.equals("none")  ? " is null" : "=" + sourceId)) : "";
+        final String strBlogId = "b.id=" + blogId;
         final String strPosted = "a.posted=" + (posted != null ? posted : "1");
         final String strCategoryId = categoryId != null ? "a.category_id=" + categoryId : "";
+        final String strMinArticleId = minArticleId == null ? "" : "a.id >= " + minArticleId;
+        final String strMaxArticleId = maxArticleId == null ? "" : "a.id <= " + maxArticleId;
+        final String strSourceId = sourceId != null ? ("a.source_id" + (sourceId.equals("none")  ? " is null" : "=" + sourceId)) : "";
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strGroupBy = "group by a.id";
         final String strLimit = "limit " + (limit != null ? limit : "100");
@@ -304,7 +313,9 @@ public class ArticleController {
         sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment as m on a.id = m.article_id ";
-        sql += "where " + strUserId;
+        sql += "where " + strBlogId;
+        sql += strMinArticleId.isEmpty() ? "" : (" and " + strMinArticleId);
+        sql += strMaxArticleId.isEmpty() ? "" : (" and " + strMaxArticleId);
         sql += strSourceId.isEmpty() ? "" : (" and " + strSourceId);
         sql += " and " + strPosted;
         sql += strCategoryId.isEmpty() ? "" : (" and " + strCategoryId);

@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/article/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/article/{articleId}/showed").permitAll()
                         .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/follow/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/{userId}/password/{password}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/{userId}/bookmark").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/**").permitAll()

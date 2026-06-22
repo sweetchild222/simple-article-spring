@@ -36,7 +36,7 @@ public class UserContext {
     }
 
 
-    public static boolean isAdminb(){
+    public static boolean isAdmin(){
 
         Object object = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
 

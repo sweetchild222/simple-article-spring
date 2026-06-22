@@ -227,12 +227,12 @@ public class UserController {
 
 
     @GetMapping("/user/{userId}/password/{password}")
-    public ResponseEntity<?> getVerifyEmail(@PathVariable long userId, @PathVariable String password) {
+    public ResponseEntity<?> getCheckPassword(@PathVariable long userId, @PathVariable String password) {
 
         if(userId != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final String sql = "select password from user where id=" + String.valueOf(userId);
+        final String sql = "select password from user where id=" + userId;
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 

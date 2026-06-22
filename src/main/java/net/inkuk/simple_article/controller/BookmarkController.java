@@ -16,8 +16,8 @@ import java.util.Map;
 @RestController
 public class BookmarkController {
 
-    @GetMapping("/user/{user_id}/bookmark")
-    public ResponseEntity<?> getBookmarks(@PathVariable long user_id, @RequestParam Map<String, String> params) {
+    @GetMapping("/user/{userId}/bookmark")
+    public ResponseEntity<?> getBookmarks(@PathVariable long userId, @RequestParam Map<String, String> params) {
 
         final String articleId = ObjectCovert.asString(params.get("article_id"));
 
@@ -25,7 +25,7 @@ public class BookmarkController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "select * from bookmark ";
-        sql += "where user_id=" + user_id;
+        sql += "where user_id=" + userId;
         sql += articleId != null ? (" and article_id=" + articleId) : "";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);

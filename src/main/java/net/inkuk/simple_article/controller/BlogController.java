@@ -32,7 +32,7 @@ public class BlogController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
-
+/*
     @PostMapping("/blog")
     public ResponseEntity<?> postBlog(@RequestBody @NotNull Map<String, Object> payload) {
 
@@ -63,8 +63,10 @@ public class BlogController {
         else
             return new ResponseEntity<>(Map.of("id", id), HttpStatus.OK);
     }
+ */
 
 
+    /*
     @DeleteMapping("/blog/{blogId}")
     public ResponseEntity<?> deleteCategories(@PathVariable long blogId) {
 
@@ -88,6 +90,7 @@ public class BlogController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    */
 
 
     @PatchMapping("/blog/{blogId}")

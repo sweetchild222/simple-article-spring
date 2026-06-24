@@ -22,9 +22,9 @@ public class UserController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
 
-        String sql = "select u.id as user_id, u.username, u.image, u.nickname, u.create_at, b.id as blog_id ";
+        String sql = "select u.id as id, u.username, u.image, u.nickname, u.create_at, b.id as blog_id ";
         sql += "from user as u left outer join blog as b on u.id = b.user_id ";
-        sql += "where u.id = " + userId + " and withdraw_at is null";
+        sql += "where u.id = " + userId + " and u.withdraw_at is null";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 
@@ -42,7 +42,6 @@ public class UserController {
     public ResponseEntity<?> getUsers(@RequestParam Map<String, String> params) {
 
         String paramId = params.get("id");
-
         if(paramId == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
@@ -51,7 +50,11 @@ public class UserController {
         if(ids.length > 1000)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        StringBuilder sqlBuilder = new StringBuilder("select id, image, nickname, role from user where withdraw_at is null and ");
+        String sqlCore = "select u.id as id, u.image, u.nickname, u.role, b.id as blog_id ";
+        sqlCore += "from user as u left outer join blog as b on u.id = b.user_id ";
+        sqlCore += "where u.withdraw_at is null and ";
+
+        StringBuilder sqlBuilder = new StringBuilder(sqlCore);
 
         int count = ids.length;
 
@@ -60,7 +63,7 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             else{
                 count--;
-                sqlBuilder.append("id=").append(count > 0 ? (id + " or ") : id);
+                sqlBuilder.append("u.id=").append(count > 0 ? (id + " or ") : id);
             }
         }
 

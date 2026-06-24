@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/subscribe/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/{userId}/password/{password}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/{userId}/bookmark").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/user/{userId}/alarm").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/blog/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()

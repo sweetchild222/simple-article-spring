@@ -70,15 +70,17 @@ public class ArticleController {
     @GetMapping("/article/{articleId}")
     public ResponseEntity<?> getArticle(@PathVariable long articleId) {
 
-        String sql = "select a.*, c.blog_id as blog_id, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count, ";
+        String sql = "select a.*, c.blog_id as blog_id, b.user_id, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count, ";
         sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count ";
         sql += "from article as a ";
         sql += "inner join category as c on a.category_id = c.id ";
+        sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment as m on a.id = m.article_id ";
         sql += "left join bookmark as k on a.id = k.article_id ";
         sql += "where a.id=" + articleId + " ";
         sql += "and (a.posted=1 or (c.blog_id = " + UserContext.blogID() + "))";
+
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 

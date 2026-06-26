@@ -23,7 +23,7 @@ public class AlarmController {
         if(UserContext.userID() != userId)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final String sql = "select * from alarm where user_id = " + userId;
+        final String sql = "select * from alarm where to_user_id = " + userId;
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 
@@ -36,23 +36,26 @@ public class AlarmController {
     @PostMapping("/alarm")
     public ResponseEntity<?> postAlarm(@RequestBody @NotNull Map<String, Object> payload) {
 
-        final Number userId = ObjectCovert.asNumber(payload.get("user_id"));
+        final Number toUserId = ObjectCovert.asNumber(payload.get("to_user_id"));
+        final Number fromUserId = ObjectCovert.asNumber(payload.get("from_user_id"));
         final String type = ObjectCovert.asString(payload.get("type"));
         final Number commentId = ObjectCovert.asNumber(payload.get("comment_id"));
-        final Number articleId = ObjectCovert.asNumber(payload.get("article_id"));
 
-        if(userId == null || type == null || (commentId == null && articleId == null))
+        if(toUserId == null || type == null || fromUserId == null || commentId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if (!Arrays.asList(new String[]{"ARTICLE","COMMENT","MENTION"}).contains(type.toUpperCase()))
+        if(fromUserId.longValue() != UserContext.userID())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        if (!Arrays.asList(new String[]{"COMMENT","REPLY","MENTION"}).contains(type.toUpperCase()))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final String strUserId = String.valueOf(userId);
-        final String strCommentId = commentId == null ? "null" : String.valueOf(commentId);
-        final String strArticleId = articleId == null ? "null" : String.valueOf(articleId);
+        final String strToUserId = String.valueOf(toUserId);
+        final String strFromUserId = String.valueOf(fromUserId);
+        final String strCommentId = String.valueOf(commentId);
 
-        String sql = "insert ignore into alarm (user_id, type, comment_id, article_id) ";
-        sql += "values (" + strUserId + ", '" + type + "', " + strCommentId + ", " + strArticleId + ")";
+        String sql = "insert ignore into alarm (from_user_id, to_user_id, type, comment_id) ";
+        sql += "values (" + strFromUserId + ", " + strToUserId + ", '" + type + "', " + strCommentId + ")";
 
         final long id = DataBaseClientPool.getClient(UserContext.userID()).insertRow(sql);
 
@@ -69,7 +72,7 @@ public class AlarmController {
     public ResponseEntity<?> deleteAlarm(@PathVariable long alarmId) {
 
         String sql = "delete from alarm where id = " + alarmId;
-        sql += " and user_id = " + UserContext.userID();
+        sql += " and to_user_id = " + UserContext.userID();
 
         final int affectCount = DataBaseClientPool.getClient(UserContext.userID()).deleteRow(sql);
 
@@ -100,7 +103,7 @@ public class AlarmController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update alarm set checked = '" + checked + "'";
-        sql += " where id = " + alarmId  + " and user_id=" + UserContext.userID();
+        sql += " where id = " + alarmId  + " and to_user_id=" + UserContext.userID();
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 

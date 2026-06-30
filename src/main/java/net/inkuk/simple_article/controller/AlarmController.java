@@ -23,7 +23,12 @@ public class AlarmController {
         if(UserContext.userID() != userId)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final String sql = "select * from alarm where to_user_id = " + userId;
+        String sql = "select r.*, c.comment, c.article_id, t.blog_id ";
+        sql += "from alarm as r ";
+        sql += "inner join comment as c on c.id = r.comment_id ";
+        sql += "inner join article as a on a.id = c.article_id ";
+        sql += "inner join category as t on a.category_id = t.id ";
+        sql += "where to_user_id = " + userId;
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 

@@ -3,6 +3,7 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.ObjectCovert;
+import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,48 @@ public class CommentController {
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
+
+
+    @GetMapping("/comment")
+    public ResponseEntity<?> getComments(@RequestParam Map<String, String> params) {
+
+        String paramId = params.get("id");
+        if(paramId == null)
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        String [] ids = paramId.split(",");
+
+        if(ids.length > 1000)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String sqlCore = "select c.*, count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count ";
+        sqlCore += "from comment as c left join comment_great as g on c.id = g.comment_id ";
+        sqlCore += "where ";
+
+        StringBuilder sqlBuilder = new StringBuilder(sqlCore);
+
+        int count = ids.length;
+
+        for(String id: ids) {
+            if (!QueryParamChecker.validInteger(id, 0, null, false))
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            else{
+                count--;
+                sqlBuilder.append("c.id=").append(count > 0 ? (id + " or ") : id);
+            }
+        }
+
+        final String sql = sqlBuilder.toString() + " group by c.id";
+
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
+
+        if(list == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+
 
 
     @DeleteMapping("/comment/{commentId}")

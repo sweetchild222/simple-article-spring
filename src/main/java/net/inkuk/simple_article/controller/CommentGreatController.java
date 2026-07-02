@@ -21,15 +21,24 @@ public class CommentGreatController {
 
         final String userId = ObjectCovert.asString(params.get("user_id"));
         final String commentId = ObjectCovert.asString(params.get("comment_id"));
+        final String articleId = ObjectCovert.asString(params.get("article_id"));
 
         if(!QueryParamChecker.validInteger(userId, 0, null, false))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!QueryParamChecker.validInteger(commentId, 0, null, false))
+        if(!QueryParamChecker.validInteger(commentId, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "select * from comment_great ";
-        sql +=  "where user_id=" + userId + " and comment_id=" + commentId;
+        if(!QueryParamChecker.validInteger(articleId, 0, null, true))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String strUserId = "g.user_id=" + userId;
+        final String strCommentId = commentId != null ? "and g.comment_id=" + commentId : "";
+        final String strArticleId = articleId != null ? "and c.article_id=" + articleId : "";
+
+        String sql = "select g.*, c.article_id from comment_great as g ";
+        sql += "inner join comment as c on c.id = g.comment_id ";
+        sql += "where " + strUserId + " " + strCommentId + " " + strArticleId;
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 

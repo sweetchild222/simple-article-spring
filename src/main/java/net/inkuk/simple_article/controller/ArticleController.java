@@ -65,7 +65,7 @@ public class ArticleController {
             sqlBuilder.append("b.id=").append(count > 0 ? (id + " or ") : id);
         }
 
-        return sqlBuilder.toString();
+        return "(" + sqlBuilder.toString() + ")";
     }
 
 
@@ -76,7 +76,7 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "100");
         final String orderDirection = (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
         final String strOrder = "order by " + orderType + " " + orderDirection;
-        final String strBlogIds = blogIds != null ? ("and " + makeBlogIdsWhere(blogIds)) : "";
+        final String strBlogIds = blogIds != null ? ("and " + makeBlogIdsWhere(blogIds)): "";
 
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
         sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count ";

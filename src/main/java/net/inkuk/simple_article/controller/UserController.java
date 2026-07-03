@@ -61,7 +61,7 @@ public class UserController {
             sqlBuilder.append("u.id=").append(count > 0 ? (id + " or ") : id);
         }
 
-        final String sql = sqlBuilder.toString();
+        final String sql = "(" + sqlBuilder.toString() + ")";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 

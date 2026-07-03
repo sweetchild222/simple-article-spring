@@ -60,7 +60,7 @@ public class CommentController {
             sqlBuilder.append("c.id=").append(count > 0 ? (id + " or ") : id);
         }
 
-        final String sql = sqlBuilder.toString() + " group by c.id";
+        final String sql = "(" + sqlBuilder.toString() + ")" + " group by c.id";
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 

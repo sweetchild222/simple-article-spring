@@ -40,14 +40,12 @@ public class CommentController {
     @GetMapping("/comment")
     public ResponseEntity<?> getComments(@RequestParam Map<String, String> params) {
 
-        String paramId = params.get("id");
-        if(paramId == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        String commentIds = params.get("id");
 
-        String [] ids = paramId.split(",");
-
-        if(ids.length > 1000)
+        if(!QueryParamChecker.validIntegerList(commentIds, 0, null, false, 1000))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String [] ids = commentIds.split(",");
 
         String sqlCore = "select c.*, count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count ";
         sqlCore += "from comment as c left join comment_great as g on c.id = g.comment_id ";
@@ -58,12 +56,8 @@ public class CommentController {
         int count = ids.length;
 
         for(String id: ids) {
-            if (!QueryParamChecker.validInteger(id, 0, null, false))
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            else{
-                count--;
-                sqlBuilder.append("c.id=").append(count > 0 ? (id + " or ") : id);
-            }
+            count--;
+            sqlBuilder.append("c.id=").append(count > 0 ? (id + " or ") : id);
         }
 
         final String sql = sqlBuilder.toString() + " group by c.id";
@@ -75,8 +69,6 @@ public class CommentController {
 
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
-
-
 
 
     @DeleteMapping("/comment/{commentId}")

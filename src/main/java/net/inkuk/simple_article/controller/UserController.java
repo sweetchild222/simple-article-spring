@@ -41,14 +41,12 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<?> getUsers(@RequestParam Map<String, String> params) {
 
-        String paramId = params.get("id");
-        if(paramId == null)
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        String userIds = params.get("id");
 
-        String [] ids = paramId.split(",");
-
-        if(ids.length > 1000)
+        if(!QueryParamChecker.validIntegerList(userIds, 0, null, false, 1000))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String [] ids = userIds.split(",");
 
         String sqlCore = "select u.id as id, u.image, u.nickname, u.role, b.id as blog_id ";
         sqlCore += "from user as u left outer join blog as b on u.id = b.user_id ";
@@ -59,12 +57,8 @@ public class UserController {
         int count = ids.length;
 
         for(String id: ids) {
-            if (!QueryParamChecker.validInteger(id, 0, null, false))
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            else{
-                count--;
-                sqlBuilder.append("u.id=").append(count > 0 ? (id + " or ") : id);
-            }
+            count--;
+            sqlBuilder.append("u.id=").append(count > 0 ? (id + " or ") : id);
         }
 
         final String sql = sqlBuilder.toString();

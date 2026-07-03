@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ public class ArticleController {
         final String offset = ObjectCovert.asString(params.get("offset"));
         final String limit = ObjectCovert.asString(params.get("limit"));
         final String order = ObjectCovert.asString(params.get("order"));
+        final String orderType = params.get("order_type") == null ? "post_at" : ObjectCovert.asString(params.get("order_type")); // default is posted
+        final String blogIds = ObjectCovert.asString(params.get("blog_id"));
 
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -32,9 +35,15 @@ public class ArticleController {
         if (!QueryParamChecker.validInteger(order, 0, 1, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final String sql = makeSql(offset, limit, order);
+        if (!Arrays.asList(new String[]{"post_at", "like_count", "comment_count"}).contains(orderType.toLowerCase()))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
+        if(!QueryParamChecker.validIntegerList(blogIds, 0, null, true, 100))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String sql = this.makeSelectSql(orderType, offset, limit, order, blogIds);
+
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
         if(list == null)
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -43,25 +52,42 @@ public class ArticleController {
     }
 
 
-    private static @NotNull String makeSql(String offset, String limit, String order) {
+    private String makeBlogIdsWhere(String blogIds){
 
-        final String strPosted = "a.posted=1";
-        final String strSourceId = "a.source_id is null";
-        final String strGroupBy = "group by a.id";
+        String [] ids = blogIds.split(",");
 
-        final String strLimit = "limit " + (limit != null ? limit : "100");
+        StringBuilder sqlBuilder = new StringBuilder();
+
+        int count = ids.length;
+
+        for(String id: ids) {
+            count--;
+            sqlBuilder.append("b.id=").append(count > 0 ? (id + " or ") : id);
+        }
+
+        return sqlBuilder.toString();
+    }
+
+
+    private @NotNull String makeSelectSql(String orderType, String offset, String limit, String order, String blogIds) {
+
         final String strOffset = "offset " + (offset != null ? offset : "0");
+        final String strGroupBy = "group by a.id";
+        final String strLimit = "limit " + (limit != null ? limit : "100");
         final String orderDirection = (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
-        final String strOrder = "order by a.post_at " + orderDirection + ", a.update_at " + orderDirection + ", a.create_at " + orderDirection;
+        final String strOrder = "order by " + orderType + " " + orderDirection;
+        final String strBlogIds = blogIds != null ? ("and " + makeBlogIdsWhere(blogIds)) : "";
 
-        String sql = "select a.id, a.title, a.head, a.thumbnail, a.create_at, a.post_at, a.update_at, a.category_id, b.user_id, c.blog_id, ";
-        sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count ";
-        sql += "from article as a inner join category as c on a.category_id = c.id ";
+        String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
+        sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count ";
+        sql += "from article as a ";
+        sql += "inner join category as c on a.category_id = c.id ";
         sql += "inner join blog as b on c.blog_id = b.id ";
         sql += "left join article_great as g on a.id = g.article_id ";
-        sql += "left join comment m on a.id = m.article_id where ";
-        sql += strPosted + " and " + strSourceId + " ";
-        sql += strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
+        sql += "left join comment as m on a.id = m.article_id ";
+        sql += "left join bookmark as k on a.id = k.article_id ";
+        sql += "where a.posted=1 "  + strBlogIds + " ";
+        sql += " " + strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
     }
@@ -240,7 +266,7 @@ public class ArticleController {
     }
 
     @GetMapping("/blog/{blogId}/article")
-    public ResponseEntity<?> getArticles(@PathVariable long blogId, @RequestParam Map<String, String> params) {
+    public ResponseEntity<?> getBlogArticles(@PathVariable long blogId, @RequestParam Map<String, String> params) {
 
         final String posted = ObjectCovert.asString(params.get("posted"));
         final String categoryId = ObjectCovert.asString(params.get("category_id"));
@@ -284,7 +310,7 @@ public class ArticleController {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        final String sql = this.makeSelectSql(String.valueOf(blogId), posted, categoryId, minArticleId, maxArticleId, offset, limit, order, sourceId);
+        final String sql = this.makeBlogSelectSql(String.valueOf(blogId), posted, categoryId, minArticleId, maxArticleId, offset, limit, order, sourceId);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
@@ -295,7 +321,7 @@ public class ArticleController {
     }
 
 
-    private @NotNull String makeSelectSql(String blogId, String posted, String categoryId, String minArticleId, String maxArticleId, String offset, String limit, String order, String sourceId) {
+    private @NotNull String makeBlogSelectSql(String blogId, String posted, String categoryId, String minArticleId, String maxArticleId, String offset, String limit, String order, String sourceId) {
 
         final String strBlogId = "b.id=" + blogId;
         final String strPosted = "a.posted=" + (posted != null ? posted : "1");
@@ -308,7 +334,6 @@ public class ArticleController {
         final String strLimit = "limit " + (limit != null ? limit : "100");
         final String orderDirection = (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
         final String strOrder = "order by a.post_at " + orderDirection + ", a.update_at " + orderDirection + ", a.create_at " + orderDirection;
-
 
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
         sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count ";

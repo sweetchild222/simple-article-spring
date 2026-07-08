@@ -26,6 +26,7 @@ public class ArticleController {
         final String orderType = params.get("order_type") == null ? "post_at" : ObjectCovert.asString(params.get("order_type")); // default is posted
         final String blogIds = ObjectCovert.asString(params.get("blog_id"));
         final String articleIds = params.get("id");
+        final String keyword = params.get("keyword");
 
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -45,7 +46,10 @@ public class ArticleController {
         if(!QueryParamChecker.validIntegerList(articleIds, 0, null, true, 100))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final String sql = this.makeSelectSql(orderType, offset, limit, order, blogIds, articleIds);
+        if(keyword != null && keyword.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String sql = this.makeSelectSql(orderType, offset, limit, order, blogIds, articleIds, keyword);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
@@ -90,7 +94,7 @@ public class ArticleController {
     }
 
 
-    private @NotNull String makeSelectSql(String orderType, String offset, String limit, String order, String blogIds, String articleIds) {
+    private @NotNull String makeSelectSql(String orderType, String offset, String limit, String order, String blogIds, String articleIds, String keyword) {
 
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strGroupBy = "group by a.id";
@@ -99,6 +103,7 @@ public class ArticleController {
         final String strOrder = "order by " + orderType + " " + orderDirection;
         final String strArticleIds = articleIds != null ? ("and " + makeArticleIdsWhere(articleIds)): "";
         final String strBlogIds = blogIds != null ? ("and " + makeBlogIdsWhere(blogIds)): "";
+        final String strKeyword = keyword != null ? ("and (" + "lower(a.content) like " + "lower('%" + keyword + "%')" + " or lower(a.title) like " + "lower('%" + keyword + "%'))") : "";
 
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
         sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count ";
@@ -108,7 +113,7 @@ public class ArticleController {
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment as m on a.id = m.article_id ";
         sql += "left join bookmark as k on a.id = k.article_id ";
-        sql += "where a.posted=1 "  + strBlogIds + " " + strArticleIds + " ";
+        sql += "where a.posted=1 "  + strBlogIds + " " + strArticleIds + " " + strKeyword + " ";
         sql += " " + strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;
@@ -241,7 +246,7 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String strPosted = (posted.longValue() == 1 ? "1" : "0");
-        final String strPostAt = (posted.longValue() == 1 ? "now()" : "null");
+        final String strPostAt = (posted.longValue() == 1 ? "coalesce(post_at, now()) " : "null");
         final String strBlogId = String.valueOf(UserContext.blogID());
         final String strCategoryId = String.valueOf(categoryId);
 

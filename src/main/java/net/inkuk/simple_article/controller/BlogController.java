@@ -2,6 +2,7 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.ObjectCovert;
+import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,6 +32,38 @@ public class BlogController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @GetMapping("/blog")
+    public ResponseEntity<?> getBlogs(@RequestParam Map<String, String> params) {
+
+        String blogIds = params.get("id");
+
+        if(!QueryParamChecker.validIntegerList(blogIds, 0, null, false, 1000))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        String [] ids = blogIds.split(",");
+
+        String sqlCore = "select * from blog ";
+        sqlCore += "where (";
+
+        StringBuilder sqlBuilder = new StringBuilder(sqlCore);
+
+        int count = ids.length;
+
+        for(String id: ids) {
+            count--;
+            sqlBuilder.append("id=").append(count > 0 ? (id + " or ") : id + ")");
+        }
+
+        final String sql = sqlBuilder.toString();
+
+        final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
+
+        if(list == null)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
 /*

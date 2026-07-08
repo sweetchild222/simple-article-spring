@@ -50,7 +50,7 @@ public class UserController {
 
         String sqlCore = "select u.id as id, u.image, u.nickname, u.role, b.id as blog_id ";
         sqlCore += "from user as u left outer join blog as b on u.id = b.user_id ";
-        sqlCore += "where u.withdraw_at is null and ";
+        sqlCore += "where u.withdraw_at is null and (";
 
         StringBuilder sqlBuilder = new StringBuilder(sqlCore);
 
@@ -58,10 +58,10 @@ public class UserController {
 
         for(String id: ids) {
             count--;
-            sqlBuilder.append("u.id=").append(count > 0 ? (id + " or ") : id);
+            sqlBuilder.append("u.id=").append(count > 0 ? (id + " or ") : id + ")");
         }
 
-        final String sql = "(" + sqlBuilder.toString() + ")";
+        final String sql = sqlBuilder.toString();
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient().selectRows(sql);
 

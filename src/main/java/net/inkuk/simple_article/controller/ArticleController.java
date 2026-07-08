@@ -25,6 +25,7 @@ public class ArticleController {
         final String order = ObjectCovert.asString(params.get("order"));
         final String orderType = params.get("order_type") == null ? "post_at" : ObjectCovert.asString(params.get("order_type")); // default is posted
         final String blogIds = ObjectCovert.asString(params.get("blog_id"));
+        final String articleIds = params.get("id");
 
         if (!QueryParamChecker.validInteger(offset, 0, null, true))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -41,7 +42,10 @@ public class ArticleController {
         if(!QueryParamChecker.validIntegerList(blogIds, 0, null, true, 100))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final String sql = this.makeSelectSql(orderType, offset, limit, order, blogIds);
+        if(!QueryParamChecker.validIntegerList(articleIds, 0, null, true, 100))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String sql = this.makeSelectSql(orderType, offset, limit, order, blogIds, articleIds);
 
         final List<Map<String, Object>> list = DataBaseClientPool.getClient(UserContext.userID()).selectRows(sql);
 
@@ -49,6 +53,23 @@ public class ArticleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+
+    private String makeArticleIdsWhere(String articleIds){
+
+        String [] ids = articleIds.split(",");
+
+        StringBuilder sqlBuilder = new StringBuilder();
+
+        int count = ids.length;
+
+        for(String id: ids) {
+            count--;
+            sqlBuilder.append("a.id=").append(count > 0 ? (id + " or ") : id);
+        }
+
+        return "(" + sqlBuilder.toString() + ")";
     }
 
 
@@ -69,13 +90,14 @@ public class ArticleController {
     }
 
 
-    private @NotNull String makeSelectSql(String orderType, String offset, String limit, String order, String blogIds) {
+    private @NotNull String makeSelectSql(String orderType, String offset, String limit, String order, String blogIds, String articleIds) {
 
         final String strOffset = "offset " + (offset != null ? offset : "0");
         final String strGroupBy = "group by a.id";
         final String strLimit = "limit " + (limit != null ? limit : "100");
         final String orderDirection = (order != null ? (order.equals("0") ? "asc" : "desc") : "asc");
         final String strOrder = "order by " + orderType + " " + orderDirection;
+        final String strArticleIds = articleIds != null ? ("and " + makeArticleIdsWhere(articleIds)): "";
         final String strBlogIds = blogIds != null ? ("and " + makeBlogIdsWhere(blogIds)): "";
 
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
@@ -86,7 +108,7 @@ public class ArticleController {
         sql += "left join article_great as g on a.id = g.article_id ";
         sql += "left join comment as m on a.id = m.article_id ";
         sql += "left join bookmark as k on a.id = k.article_id ";
-        sql += "where a.posted=1 "  + strBlogIds + " ";
+        sql += "where a.posted=1 "  + strBlogIds + " " + strArticleIds + " ";
         sql += " " + strGroupBy + " " + strOrder + " " + strLimit + " " + strOffset;
 
         return sql;

@@ -42,7 +42,7 @@ public class CommentController {
 
         String commentIds = params.get("id");
 
-        if(!QueryParamChecker.validIntegerList(commentIds, 0, null, false, 1000))
+        if(!QueryParamChecker.validIntegerList(commentIds, 0, null, false, 100))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String [] ids = commentIds.split(",");

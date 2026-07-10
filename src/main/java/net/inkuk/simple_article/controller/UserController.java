@@ -440,25 +440,25 @@ public class UserController {
     }
 
 
-    @PatchMapping("email/{email}/password-reset")
+    @PatchMapping("password-reset/email/{email}")
     public ResponseEntity<?> patchEmailPasswordReset(@PathVariable String email) {
 
         if(email.length() > 50)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!userJoinCertifyCodeList.isCertified(email))
+        if(!passwordResetCertifyCodeList.isCertified(email))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        userJoinCertifyCodeList.remove(email);
+        passwordResetCertifyCodeList.remove(email);
 
         String password = PasswordGenerator.generate();
-
-        String encryptPassword = (new BCryptPasswordEncoder()).encode(password);
 
         if(!emailService.sendPassword(email, password))
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        final String sql = "update user set password ='" + encryptPassword + "' where username=" + email;
+        String encryptPassword = (new BCryptPasswordEncoder()).encode(password);
+
+        final String sql = "update user set password ='" + encryptPassword + "' where username='" + email + "'";
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 

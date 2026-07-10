@@ -35,8 +35,8 @@ public class CertifyEmailCode {
 
         long timestamp = Instant.now().toEpochMilli();
 
-        //long validTimespan = 1000 * 60 * 10; //10 min
-        long validTimespan = 1000 * 20; //20 sec
+        long validTimespan = 1000 * 60 * 60; //1 hour
+        //long validTimespan = 1000 * 20; //20 sec
 
         return (timestamp - this.timestamp) > validTimespan;
     }

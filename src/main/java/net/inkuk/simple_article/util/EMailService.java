@@ -23,9 +23,8 @@ public class EMailService {
         try {
 
             String body = "<h3>" + "요청하신 인증 번호입니다." + "</h3>";
-            body += "<h1>" + code + "</h1>";
-            body += "<h3>" + "인증 번호 유효 기간은 1시간 입니다." + "</h3>";
-            body += "<h3>" + "감사합니다." + "</h3>";
+            body += "<h1>인증 번호 : " + code + "</h1>";
+            body += "<h3>" + "인증 번호 유효 기간은 1시간 입니다. 감사합니다." + "</h3>";
 
             message.setFrom(senderEmail);
             message.setRecipients(MimeMessage.RecipientType.TO, email);
@@ -70,12 +69,12 @@ public class EMailService {
         try {
 
             String body = "<h3>" + "임시 비밀번호가 발급되었습니다." + "</h3>";
-            body += "<h1>" + password + "</h1>";
+            body += "<h1>임시 비밀 번호 : " + password + "</h1>";
             body += "<h3>" + "감사합니다." + "</h3>";
 
             message.setFrom(senderEmail);
             message.setRecipients(MimeMessage.RecipientType.TO, email);
-            message.setSubject("이메일 인증");
+            message.setSubject("임시 비밀 번호 발급");
             message.setText(body,"UTF-8", "html");
 
             return message;

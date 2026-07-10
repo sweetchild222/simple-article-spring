@@ -23,6 +23,8 @@ public class PasswordGenerator {
             password.append(ALL.charAt(randomIndex));
         }
 
+        Log.debug(password.toString());
+
         return password.toString();
     }
 }

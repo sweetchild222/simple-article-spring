@@ -2,7 +2,10 @@ package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
-import net.inkuk.simple_article.util.CertifiedEmail;
+import net.inkuk.simple_article.util.CertifyEmailCode;
+import net.inkuk.simple_article.util.CertifyEmailCodeList;
+import net.inkuk.simple_article.util.EMailService;
+import net.inkuk.simple_article.util.ObjectCovert;
 import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
@@ -12,13 +15,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @RestController
 public class UserController {
+
+    private CertifyEmailCodeList certifyCodeList = new CertifyEmailCodeList();
+    private EMailService emailService;
+
+    public UserController(EMailService emailService) {
+
+        this.emailService = emailService;
+    }
+
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUser(@PathVariable long userId) {
@@ -137,8 +147,10 @@ public class UserController {
         if(nickname.isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!CertifiedEmail.removeUserJoin(username))
+        if(!certifyCodeList.isCertified(username))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        certifyCodeList.remove(username);
 
         String sql = "insert ignore into user (username, password, image, nickname) select ";
         sql += "'" + username + "', ";
@@ -309,4 +321,70 @@ public class UserController {
 
         return sqlBuilder.toString();
     }
+
+
+
+    @PostMapping("certify/user-join")
+    public ResponseEntity<?> postCertifyUserJoin(@RequestBody @NotNull Map<String, String> payload) {
+
+        final String email = payload.get("email");
+
+        if(email == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(email.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final long code = (long)(Math.random() * (90000)) + 100000; //(long) Math.random() * (최댓값-최소값+1) + 최소값
+        final boolean success = this.emailService.sendEMail(email, code);
+
+        if(success) {
+            certifyCodeList.remove(email);
+            certifyCodeList.add(email, code);
+        }
+
+        return new ResponseEntity<>(success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    @PatchMapping("certify/user-join")
+    public ResponseEntity<?> patchCertifyUserJoin(@RequestBody @NotNull Map<String, String> payload) {
+
+        final String email = ObjectCovert.asString(payload.get("email"));
+
+        if(email == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(email.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String code = ObjectCovert.asString(payload.get("code"));
+
+        if(!isLong(code))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        certifyCodeList.removeExpired();
+
+        final boolean isMatch = certifyCodeList.isMatch(email, Long.parseLong(code));
+
+        if(isMatch)
+            certifyCodeList.setCertified(email);
+
+        return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
+    }
+
+
+    private boolean isLong(String str) {
+
+        if (str == null || str.trim().isEmpty())
+            return false;
+
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 }

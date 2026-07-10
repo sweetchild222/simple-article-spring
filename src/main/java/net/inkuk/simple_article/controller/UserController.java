@@ -5,6 +5,7 @@ import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.CertifyEmailCode;
 import net.inkuk.simple_article.util.CertifyEmailCodeList;
 import net.inkuk.simple_article.util.EMailService;
+import net.inkuk.simple_article.util.PasswordGenerator;
 import net.inkuk.simple_article.util.ObjectCovert;
 import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
@@ -21,8 +22,9 @@ import java.util.regex.Pattern;
 @RestController
 public class UserController {
 
-    private CertifyEmailCodeList certifyCodeList = new CertifyEmailCodeList();
-    private EMailService emailService;
+    private final CertifyEmailCodeList userJoinCertifyCodeList = new CertifyEmailCodeList();
+    private final CertifyEmailCodeList passwordResetCertifyCodeList = new CertifyEmailCodeList();
+    private final EMailService emailService;
 
     public UserController(EMailService emailService) {
 
@@ -147,10 +149,10 @@ public class UserController {
         if(nickname.isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!certifyCodeList.isCertified(username))
+        if(!userJoinCertifyCodeList.isCertified(username))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        certifyCodeList.remove(username);
+        userJoinCertifyCodeList.remove(username);
 
         String sql = "insert ignore into user (username, password, image, nickname) select ";
         sql += "'" + username + "', ";
@@ -336,11 +338,11 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final long code = (long)(Math.random() * (90000)) + 100000; //(long) Math.random() * (최댓값-최소값+1) + 최소값
-        final boolean success = this.emailService.sendEMail(email, code);
+        final boolean success = this.emailService.sendCertifyCode(email, code);
 
         if(success) {
-            certifyCodeList.remove(email);
-            certifyCodeList.add(email, code);
+            userJoinCertifyCodeList.remove(email);
+            userJoinCertifyCodeList.add(email, code);
         }
 
         return new ResponseEntity<>(success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
@@ -363,12 +365,12 @@ public class UserController {
         if(!isLong(code))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        certifyCodeList.removeExpired();
+        userJoinCertifyCodeList.removeExpired();
 
-        final boolean isMatch = certifyCodeList.isMatch(email, Long.parseLong(code));
+        final boolean isMatch = userJoinCertifyCodeList.isMatch(email, Long.parseLong(code));
 
         if(isMatch)
-            certifyCodeList.setCertified(email);
+            userJoinCertifyCodeList.setCertified(email);
 
         return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
     }
@@ -387,4 +389,88 @@ public class UserController {
         }
     }
 
+
+    @PostMapping("certify/password-reset")
+    public ResponseEntity<?> postCertifyPasswordReset(@RequestBody @NotNull Map<String, String> payload) {
+
+        final String email = payload.get("email");
+
+        if(email == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(email.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final long code = (long)(Math.random() * (90000)) + 100000; //(long) Math.random() * (최댓값-최소값+1) + 최소값
+        final boolean success = this.emailService.sendCertifyCode(email, code);
+
+        if(success) {
+            passwordResetCertifyCodeList.remove(email);
+            passwordResetCertifyCodeList.add(email, code);
+        }
+
+        return new ResponseEntity<>(success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    @PatchMapping("certify/password-reset")
+    public ResponseEntity<?> patchCertifyPasswordReset(@RequestBody @NotNull Map<String, String> payload) {
+
+        final String email = ObjectCovert.asString(payload.get("email"));
+
+        if(email == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(email.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String code = ObjectCovert.asString(payload.get("code"));
+
+        if(!isLong(code))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        passwordResetCertifyCodeList.removeExpired();
+
+        final boolean isMatch = passwordResetCertifyCodeList.isMatch(email, Long.parseLong(code));
+
+        if(isMatch)
+            passwordResetCertifyCodeList.setCertified(email);
+
+        return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
+    }
+
+
+    @PatchMapping("email/{email}/password-reset")
+    public ResponseEntity<?> patchEmailPasswordReset(@PathVariable String email) {
+
+        if(email.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!userJoinCertifyCodeList.isCertified(email))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        userJoinCertifyCodeList.remove(email);
+
+        String password = PasswordGenerator.generate();
+
+        String encryptPassword = (new BCryptPasswordEncoder()).encode(password);
+
+        if(!emailService.sendPassword(email, password))
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        final String sql = "update user set password ='" + encryptPassword + "' where username=" + email;
+
+        final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
+
+        if(matchCount == -1)
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else if(matchCount == 0)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else if(matchCount == 1)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else {
+            Log.error("Unexcepted match count: " + matchCount);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

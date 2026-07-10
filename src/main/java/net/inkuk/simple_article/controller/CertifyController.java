@@ -1,19 +1,18 @@
 package net.inkuk.simple_article.controller;
 
-import net.inkuk.simple_article.database.DataBaseClientPool;
-import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.EMailService;
+import net.inkuk.simple_article.util.Log;
+import net.inkuk.simple_article.util.ObjectCovert;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.*;
 
 
 @RestController
-public class MailController {
+public class CertifyController {
 
     public static class CodeAt{
 
@@ -45,7 +44,7 @@ public class MailController {
     private final Map<String, CodeAt> hashCodeAt = new HashMap<String, CodeAt>();
     private final EMailService emailService;
 
-    public MailController(EMailService emailService) {
+    public CertifyController(EMailService emailService) {
 
         this.emailService = emailService;
     }
@@ -56,8 +55,23 @@ public class MailController {
         return (long)(Math.random() * (90000)) + 100000; //(long) Math.random() * (최댓값-최소값+1) + 최소값
     }
 
-    @PostMapping("/verifyEmail")
-    public ResponseEntity<?> postVerifyEmail(@RequestBody @NotNull Map<String, String> payload) {
+
+
+//    @PostMapping("certify/user-join")
+//    @GetMapping("certify/{code}/user-join/{mail}")
+
+//    @PostMapping("certify/password-reset")
+//    @GetMapping("certify/{code}/password-reset")
+
+//    @PostMapping("certify/user/password")
+//    @PostMapping("user/password-reset")
+//    public ResponseEntity<?> postVerifyail(@RequestBody @NotNull Map<String, String> payload) {
+//
+//        return null;
+//    }
+
+    @PostMapping("certify/user-join")
+    public ResponseEntity<?> postCertifyUserJoin(@RequestBody @NotNull Map<String, String> payload) {
 
         final String email = payload.get("email");
 
@@ -79,20 +93,46 @@ public class MailController {
     }
 
 
-    @GetMapping("/verifyEmail/{mail}/{code}")
-    public ResponseEntity<?> getVerifyEmail(@PathVariable String mail, @PathVariable long code) {
+    private boolean isLong(String str) {
 
-        this.hashCodeAt.values().removeIf(entry -> entry.isExpired());
+        if (str == null || str.trim().isEmpty())
+            return false;
 
-        final CodeAt codeAt = this.hashCodeAt.get(mail);
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    @PatchMapping("certify/user-join")
+    public ResponseEntity<?> patchCertifyUserJoin(@RequestBody @NotNull Map<String, String> payload) {
+
+        final String email = ObjectCovert.asString(payload.get("email"));
+
+        if(email == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(email.length() > 2000)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        final String code = ObjectCovert.asString(payload.get("code"));
+
+        if(!isLong(code))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        this.hashCodeAt.values().removeIf(CodeAt::isExpired);
+
+        final CodeAt codeAt = this.hashCodeAt.get(email);
 
         if(codeAt == null)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
-        final boolean isMatch = codeAt.isMatch(code);
+        final boolean isMatch = codeAt.isMatch(Long.parseLong(code));
 
         if(isMatch)
-            this.hashCodeAt.remove(mail);
+            this.hashCodeAt.remove(email);
 
         return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
     }

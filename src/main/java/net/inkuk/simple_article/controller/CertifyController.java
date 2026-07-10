@@ -1,6 +1,7 @@
 package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.util.EMailService;
+import net.inkuk.simple_article.util.CertifiedEmail;
 import net.inkuk.simple_article.util.Log;
 import net.inkuk.simple_article.util.ObjectCovert;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +79,7 @@ public class CertifyController {
         if(email == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(email.length() > 2000)
+        if(email.length() > 50)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final long code = createCode();
@@ -114,7 +115,7 @@ public class CertifyController {
         if(email == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(email.length() > 2000)
+        if(email.length() > 50)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String code = ObjectCovert.asString(payload.get("code"));
@@ -131,8 +132,13 @@ public class CertifyController {
 
         final boolean isMatch = codeAt.isMatch(Long.parseLong(code));
 
-        if(isMatch)
+        if(isMatch) {
+
+            if(!CertifiedEmail.putUserJoin(email))
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
             this.hashCodeAt.remove(email);
+        }
 
         return new ResponseEntity<>(Map.of("match", isMatch), HttpStatus.OK);
     }

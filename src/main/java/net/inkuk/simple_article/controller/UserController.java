@@ -2,6 +2,7 @@ package net.inkuk.simple_article.controller;
 
 import net.inkuk.simple_article.database.DataBaseClientPool;
 import net.inkuk.simple_article.util.Log;
+import net.inkuk.simple_article.util.CertifiedEmail;
 import net.inkuk.simple_article.util.QueryParamChecker;
 import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
@@ -76,6 +77,9 @@ public class UserController {
     @GetMapping("/user/exist/{username}")
     public ResponseEntity<?> getUserExist(@PathVariable String username) {
 
+        if(username.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         final String sql = "select count(*) > 0 as exist from user where username = '" + username + "'";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
@@ -121,6 +125,9 @@ public class UserController {
         if(username == null || password == null || image == null || nickname == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(username.length() > 50)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         if(!(validPassword(password) && validUsername(username)))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -128,6 +135,9 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(nickname.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!CertifiedEmail.removeUserJoin(username))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "insert ignore into user (username, password, image, nickname) select ";

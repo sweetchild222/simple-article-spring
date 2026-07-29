@@ -52,7 +52,7 @@ public class UserController {
 
 
     @GetMapping("/user")
-    public ResponseEntity<?> getUsers(@RequestParam Map<String, String> params) {
+    public ResponseEntity<?> getUsers(@RequestParam @NotNull Map<String, String> params) {
 
         String userIds = params.get("id");
 

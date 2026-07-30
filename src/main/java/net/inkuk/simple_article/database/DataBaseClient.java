@@ -20,8 +20,8 @@ public class DataBaseClient {
             final String driver = "org.mariadb.jdbc.Driver";
             Class.forName(driver);
 
-            final String ip = "3.38.108.151";
-            final String port = "4335";
+            final String ip = "127.0.0.1";
+            final String port = "44335";
             final String name = "simple_article";
 
             final String url = "jdbc:mariadb://" + ip + ":" + port + "/" + name;

@@ -95,8 +95,8 @@ server {
 server {
 
 
-	listen 9989 default_server;
-	listen [::]:9989 default_server;
+	listen 39989 default_server;
+	listen [::]:39989 default_server;
  
  	server_name _;
 

@@ -47,7 +47,7 @@ public class SimpleArticleApplication implements ApplicationRunner {
 
         final String env = System.getenv("ENV");
 
-        if(env.equals("DEV"))
+        if(env != null && env.equals("DEV"))
             System.setProperty("server.servlet.context-path", "/api");
 
         SpringApplication.run(SimpleArticleApplication.class, args);

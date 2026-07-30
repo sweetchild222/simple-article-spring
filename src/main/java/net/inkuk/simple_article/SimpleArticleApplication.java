@@ -43,160 +43,29 @@ import java.util.UUID;
 @EnableScheduling
 public class SimpleArticleApplication implements ApplicationRunner {
 
-    //DataBaseClient client = new DataBaseClient();
-
 	public static void main(String[] args) {
 
         SpringApplication.run(SimpleArticleApplication.class, args);
 
-        Log.info("asdfsa");
-        Log.error("asdfsa");
-        Log.debug("ddd");
-
-        //appContext.getBean()
-
-        //MyService myService = appContext.getBean(MyService.class);
-        //myService.doSomething();
-        //appContext.close(); // Close the context when done
-
-        //SpringApplication app = new SpringApplication(SimpleArticleApplication.class);
-
-        //app.run(args);
-
-
-
-
-
-        //UserService userService = new UserService();
-
-        //List<User> a = userService.findUser("asdf");
-        //sSystem.out.println(a);
-
-
-
+        Log.info("info is green");
+        Log.error("error is red");
+        Log.debug("debug is yellow");
 	}
 
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-
-//        for (int i = 1; i < 9; i++) {
-//
-//            File file = new File("D:\\image\\" + String.valueOf(i) + ".jpg");
-//
-//            byte[] bytes = Files.readAllBytes(file.toPath());
-//
-//            int orientation = getOrientation(new ByteArrayInputStream(bytes));
-//
-//            Log.debug(orientation);
-//
-//            final BufferedImage srcImage = ImageIO.read(new ByteArrayInputStream(bytes));
-//
-//            final int[][] sizeList = {{500, 500}, {400, 400}, {300, 300}, {100, 100}, {50, 50}};
-//
-//            final BufferedImage[] newImages = ImageResize.resize(srcImage, orientation, sizeList);
-//
-//            if (newImages != null)
-//                writeImages(newImages, orientation);
-//
-//        }
     }
-
-    private static String generateID(){
-
-        UUID uuid = UUID.randomUUID();
-
-        LocalDateTime now = LocalDateTime.now();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-
-        return now.format(formatter) + "-" + uuid.toString();
-    }
-
-
-
-    public String writeImages(BufferedImage [] images, int orientation) {
-
-        String path = "D:\\image";
-
-        if(path == null)
-            return null;
-
-        final String id = "";
-
-        boolean isFirst = true;
-
-        String representFileName = String.valueOf(orientation) + "_" + id + ".wepb";
-
-        for(BufferedImage image : images) {
-
-            final String fileName = isFirst ? representFileName : (String.valueOf(orientation) + "_" + id + "_" + image.getWidth() + "x" + image.getHeight() + ".webp");
-
-            isFirst = false;
-
-            final String filePath = path + "\\" + fileName;
-
-            if(!writeImage(image, filePath))
-                return null;
-        }
-
-        return representFileName;
-    }
-
-
-    private boolean writeImage(BufferedImage image, String filePath){
-
-        try {
-
-            return ImageIO.write(image, "webp", new File(filePath));
-        }
-        catch (IOException e){
-
-            Log.debug(filePath);
-            return false;
-        }
-    }
-
-
-
-
-    public int getOrientation(ByteArrayInputStream stream) {
-
-        try {
-
-            Metadata metadata = ImageMetadataReader.readMetadata(stream);
-            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-
-            if(directory == null)
-                return 1; //== 0 degree
-
-            return directory.getInt(ExifIFD0Directory. TAG_ORIENTATION);
-
-        } catch (ImageProcessingException | IOException | MetadataException e) {
-
-            Log.error(e.toString());
-            return 1; // 0 degree
-        }
-    }
-
-
-
-
 
 
     @PostConstruct
     public void init() {
-
-        //System.out.println("asdfsa");
+        System.out.println("PostConstruct");
     }
 
-
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 1000000)
     public void test() {
 
-
     }
-
-
 }

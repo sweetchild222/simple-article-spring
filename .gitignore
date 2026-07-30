@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-T02PRF.pem
+Lightsail.pem
 
 log
 blob

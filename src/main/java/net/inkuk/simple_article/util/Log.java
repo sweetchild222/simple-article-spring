@@ -10,7 +10,6 @@ public class Log {
     private static LogFile infoLogFile = new LogFile("log/info");
     private static LogFile errorLogFile = new LogFile("log/error");
 
-
     private static void infoCore(String message) {
 
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();

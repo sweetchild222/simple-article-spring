@@ -20,7 +20,9 @@ public class DataBaseClient {
             final String driver = "org.mariadb.jdbc.Driver";
             Class.forName(driver);
 
-            final String ip = "127.0.0.1";
+            String env = System.getenv("ENV");
+
+            final String ip = env.equals("DEV") ? "3.38.108.151" : "127.0.0.1";
             final String port = "44335";
             final String name = "simple_article";
 

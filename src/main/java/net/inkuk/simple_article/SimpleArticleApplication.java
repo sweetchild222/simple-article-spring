@@ -61,6 +61,7 @@ public class SimpleArticleApplication implements ApplicationRunner {
 
     @PostConstruct
     public void init() {
+
         System.out.println("PostConstruct");
     }
 

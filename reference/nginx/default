@@ -19,8 +19,8 @@
 # Default server configuration
 #
 server {
-	listen 8500 default_server;
-	listen [::]:8500 default_server;
+	listen 80 default_server;
+	listen [::]:80 default_server;
 
 	# SSL configuration
 	#
@@ -45,28 +45,22 @@ server {
 
 	server_name _;
 
-
 	location / {
-		try_files $uri $uri/ @extensionless-php;
-		index index.html index.htm index.php;
-	} 
-
-	#location / {
 		# First attempt to serve request as file, then
 		# as directory, then fall back to displaying a 404.
-	#	try_files $uri $uri/ =404;
-#	}
+		try_files $uri $uri/ =404;
+	}
 
 	# pass PHP scripts to FastCGI server
 	#
-	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/var/run/php/php7.2-fpm.sock;
-	}
-
-	location @extensionless-php {
-		rewrite ^(.*)$ $1.php last;
-	}
+	#location ~ \.php$ {
+	#	include snippets/fastcgi-php.conf;
+	#
+	#	# With php-fpm (or other unix sockets):
+	#	fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+	#	# With php-cgi (or other tcp sockets):
+	#	fastcgi_pass 127.0.0.1:9000;
+	#}
 
 	# deny access to .htaccess files, if Apache's document root
 	# concurs with nginx's one
@@ -77,31 +71,51 @@ server {
 }
 
 
+# Virtual Host configuration for example.com
+#
+# You can move that to a different file under sites-available/ and symlink that
+# to sites-enabled/ to enable it.
+#
+#server {
+#	listen 80;
+#	listen [::]:80;
+#
+#	server_name example.com;
+#
+#	root /var/www/example.com;
+#	index index.html;
+#
+#	location / {
+#		try_files $uri $uri/ =404;
+#	}
+#}
+
+
+
 server {
-	listen 8200 default_server;
-	listen [::]:8200 default_server;
 
-	server_name _;
+	listen [::]:443 ssl ipv6only=on;
+	listen 443 ssl;
 
+	ssl_certificate /etc/letsencrypt/live/leafstory.click/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/leafstory.click/privkey.pem;
+	include /etc/letsencrypt/options-ssl-nginx.conf;
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+	server_name leafstory.click www.leafstory.click;
+
+	client_max_body_size 10M;
+
+	root /var/www/simple;
+
+	index index.html;
 
 	location / {
-		root /var/www/csr;
-		index index.html;
-		try_files $uri $uri/ /index.html;
+
+		try_files $uri $uri/ =404;
 	}
-}
 
 
-server {
-
-
-	listen 39989 default_server;
-	listen [::]:39989 default_server;
- 
- 	server_name _;
-
-	client_max_body_size 20M;
- 
 	location /api/ {
 
 		proxy_pass http://localhost:9981/;

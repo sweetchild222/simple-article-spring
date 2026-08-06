@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 public class EMailService {
 
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail= "sweetchild22.ik@gmail.com";
 
     public EMailService(JavaMailSender javaMailSender){
         this.javaMailSender = javaMailSender;
@@ -27,7 +26,6 @@ public class EMailService {
             body += "<h1>인증 번호 : " + code + "</h1>";
             body += "<h3>" + "인증 번호 유효 기간은 1시간 입니다. 감사합니다." + "</h3>";
 
-            message.setFrom(senderEmail);
             message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("이메일 인증");
             message.setText(body,"UTF-8", "html");
@@ -73,7 +71,7 @@ public class EMailService {
             body += "<h1>임시 비밀 번호 : " + password + "</h1>";
             body += "<h3>" + "감사합니다." + "</h3>";
 
-            message.setFrom(senderEmail);
+            //message.setFrom(senderEmail);
             message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("임시 비밀 번호 발급");
             message.setText(body,"UTF-8", "html");

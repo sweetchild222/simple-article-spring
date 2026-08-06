@@ -2,6 +2,7 @@ package net.inkuk.simple_article.util;
 
 import java.time.Instant;
 
+
 public class CertifyEmailCode {
 
     private final String email;

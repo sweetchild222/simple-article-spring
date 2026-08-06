@@ -1,8 +1,6 @@
 package net.inkuk.simple_article.util;
 
-import ch.qos.logback.core.joran.sanity.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

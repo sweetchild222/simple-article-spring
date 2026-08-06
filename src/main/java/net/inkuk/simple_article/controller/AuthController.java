@@ -3,19 +3,15 @@ package net.inkuk.simple_article.controller;
 import net.inkuk.simple_article.authorization.JwtUtil;
 import net.inkuk.simple_article.authorization.SecurityUser;
 import net.inkuk.simple_article.authorization.UserDetailsServiceImpl;
-import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.Map;
 
 @RestController

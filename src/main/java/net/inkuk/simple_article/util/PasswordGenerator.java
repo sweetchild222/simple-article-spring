@@ -1,7 +1,7 @@
 package net.inkuk.simple_article.util;
 
-
 import java.security.SecureRandom;
+
 
 public class PasswordGenerator {
 

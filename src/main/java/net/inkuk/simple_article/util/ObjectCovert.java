@@ -1,7 +1,7 @@
 package net.inkuk.simple_article.util;
 
-public class ObjectCovert {
 
+public class ObjectCovert {
 
     public static Double asDouble(Object object){
 

@@ -1,10 +1,8 @@
 package net.inkuk.simple_article.authorization;
 
-import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

@@ -1,6 +1,5 @@
 package net.inkuk.simple_article.interceptor;
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.inkuk.simple_article.util.Log;

@@ -1,6 +1,5 @@
 package net.inkuk.simple_article.database;
 
-import net.inkuk.simple_article.util.UserContext;
 import org.jetbrains.annotations.NotNull;
 
 public class DataBaseClientPool {

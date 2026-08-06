@@ -1,7 +1,6 @@
 package net.inkuk.simple_article.util;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 

@@ -2,14 +2,12 @@ package net.inkuk.simple_article.authorization;
 
 import lombok.RequiredArgsConstructor;
 import net.inkuk.simple_article.database.DataBaseClientPool;
-import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 

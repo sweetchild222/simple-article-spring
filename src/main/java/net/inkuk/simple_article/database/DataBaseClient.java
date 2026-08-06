@@ -2,8 +2,6 @@ package net.inkuk.simple_article.database;
 
 import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.Nullable;
-//import org.apache.tomcat.jdbc.pool.DataSource;
-
 import java.sql.*;
 import java.util.*;
 

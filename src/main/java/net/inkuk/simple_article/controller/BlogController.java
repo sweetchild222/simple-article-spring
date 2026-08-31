@@ -170,7 +170,7 @@ public class BlogController {
                 if(title.length() > 256)
                     return null;
 
-                items.put("title", "'" + title + "'");
+                items.put("title", "'" + title.replace("'", "\\'") + "'");
             }
 
             final String image = (String) payload.get("image");
@@ -180,7 +180,7 @@ public class BlogController {
                 if(image.length() > 512)
                     return null;
 
-                items.put("image", "'" + image + "'");
+                items.put("image", "'" + image.replace("'", "\\'") + "'");
             }
 
             if (items.size() != payload.size())

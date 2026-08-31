@@ -20,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String sql = "select u.id, u.username, u.password, u.role, b.id as blog_id ";
         sql += "from user as u left outer join blog as b on u.id=b.user_id ";
-        sql += "where username = '" + username + "'";
+        sql += "where username = '" + username.replace("'", "\\'") + "'";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 

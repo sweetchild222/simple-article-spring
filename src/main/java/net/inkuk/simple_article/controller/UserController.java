@@ -90,7 +90,7 @@ public class UserController {
         if(username.length() > 50)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        final String sql = "select count(*) > 0 as exist from user where username = '" + username + "'";
+        final String sql = "select count(*) > 0 as exist from user where username = '" + username.replace("'", "\\'") + "'";
 
         final Map<String, Object> map = DataBaseClientPool.getClient().selectRow(sql);
 
@@ -153,12 +153,12 @@ public class UserController {
         userJoinCertifyCodeList.remove(username);
 
         String sql = "insert ignore into user (username, password, image, nickname) select ";
-        sql += "'" + username + "', ";
+        sql += "'" + username.replace("'", "\\'") + "', ";
         sql += "'" + (new BCryptPasswordEncoder()).encode(password) + "', ";
-        sql += "'" + image + "', ";
-        sql += "'" + nickname + "' ";
+        sql += "'" + image.replace("'", "\\'") + "', ";
+        sql += "'" + nickname.replace("'", "\\'") + "' ";
         sql += "where not exists ";
-        sql += "(select 1 from user where username = '" + username + "')";
+        sql += "(select 1 from user where username = '" + username.replace("'", "\\'") + "')";
 
         final long id = DataBaseClientPool.getClient().insertRow(sql);
 
@@ -210,7 +210,7 @@ public class UserController {
                 if(image.length() > 512)
                     return null;
 
-                items.put("image", (image != null ? ("'" + image + "'") : ""));
+                items.put("image", (image != null ? ("'" + image.replace("'", "\\'") + "'") : ""));
             }
 
 
@@ -220,7 +220,7 @@ public class UserController {
                 if(nickname.length() > 50)
                     return null;
 
-                items.put("nickname", (nickname != null ? ("'" + nickname + "'") : "''"));
+                items.put("nickname", (nickname != null ? ("'" + nickname.replace("'", "\\'") + "'") : "''"));
             }
 
             final String role = (String) payload.get("role");
@@ -456,7 +456,7 @@ public class UserController {
 
         String encryptPassword = (new BCryptPasswordEncoder()).encode(password);
 
-        final String sql = "update user set password ='" + encryptPassword + "' where username='" + email + "'";
+        final String sql = "update user set password ='" + encryptPassword + "' where username='" + email.replace("'", "\\'") + "'";
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 

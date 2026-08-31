@@ -86,7 +86,7 @@ public class CategoryController {
         if(name.length() > 16)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        String sql = "update category set name = '" + name + "'";
+        String sql = "update category set name = '" + name.replace("'", "\\'") + "'";
         sql += " where id = " + categoryId  + " and blog_id=" + UserContext.blogID();
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
 
@@ -123,7 +123,7 @@ public class CategoryController {
         final int maxCategory = 10;
 
         String sql = "insert ignore into category (name, blog_id) ";
-        sql += "select '" + name + "', " + strBlogId;
+        sql += "select '" + name.replace("'", "\\'") + "', " + strBlogId;
         sql += " where (select count(*) from category where blog_id=" + strBlogId + ") < " + maxCategory;
 
         final long id = DataBaseClientPool.getClient(UserContext.userID()).insertRow(sql);

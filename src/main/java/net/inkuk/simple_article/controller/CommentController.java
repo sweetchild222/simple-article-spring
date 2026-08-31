@@ -103,7 +103,7 @@ public class CommentController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update comment set ";
-        sql += "comment='" + comment + "' ";
+        sql += "comment='" + comment.replace("'", "\\'") + "' ";
         sql += "where id=" + commentId + " and user_id=" + UserContext.userID();
 
         final int matchCount = DataBaseClientPool.getClient(UserContext.userID()).updateRow(sql);
@@ -143,7 +143,7 @@ public class CommentController {
         final String strCommentId = commentId != null ? String.valueOf(commentId) : "null";
 
         String sql = "insert ignore into comment (comment, user_id, article_id, comment_id) ";
-        sql += "select '" + comment + "', " + strUserId + ", " + strArticleId + ", " + strCommentId;
+        sql += "select '" + comment.replace("'", "\\'") + "', " + strUserId + ", " + strArticleId + ", " + strCommentId;
         sql += " where exists " + "(select 1 from article where id=" +  strArticleId + ")";
         sql += commentId != null ? " and exists (select 1 from comment where id=" + strCommentId + ")" : "";
 

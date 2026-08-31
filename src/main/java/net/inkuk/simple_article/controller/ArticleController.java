@@ -102,7 +102,7 @@ public class ArticleController {
         final String strOrder = "order by " + orderType + " " + orderDirection;
         final String strArticleIds = articleIds != null ? ("and " + makeArticleIdsWhere(articleIds)): "";
         final String strBlogIds = blogIds != null ? ("and " + makeBlogIdsWhere(blogIds)): "";
-        final String strKeyword = keyword != null ? ("and (" + "lower(a.content) like " + "lower('%" + keyword + "%')" + " or lower(a.title) like " + "lower('%" + keyword + "%'))") : "";
+        final String strKeyword = keyword != null ? ("and (" + "lower(a.content) like " + "lower('%" + keyword.replace("'", "\\'") + "%')" + " or lower(a.title) like " + "lower('%" + keyword.replace("'", "\\'") + "%'))") : "";
 
         String sql = "select a.id, a.title, a.head, a.showed, a.category_id, a.posted, a.post_at, a.thumbnail, a.create_at, a.update_at, a.source_id, b.user_id, c.blog_id, ";
         sql += "count(distinct if(g.great=1, g.id, NULL)) as like_count, count(distinct if(g.great=-1, g.id, NULL)) as dislike_count, count(distinct m.id) as comment_count, count(distinct k.id) as bookmark_count ";
@@ -182,8 +182,9 @@ public class ArticleController {
         final String strSourceId = sourceId != null ? String.valueOf(sourceId) : "null";
         final int maxNotPostedCount = 10;
 
+
         String sql = "insert ignore into article (title, head, content, posted, post_at, thumbnail, category_id, source_id)";
-        sql += " select '" + title + "', '" + head + "', '" + content + "', " + strPosted + ", " + strPostAt + ", '" + thumbnail + "', " + strCategoryId + ", " + strSourceId;
+        sql += " select '" + title.replace("'", "\\'") + "', '" + head.replace("'", "\\'") + "', '" + content.replace("'", "\\'") + "', " + strPosted + ", " + strPostAt + ", '" + thumbnail.replace("'", "\\'") + "', " + strCategoryId + ", " + strSourceId;
         sql += " where (exists " + "(select 1 from category where id=" +  strCategoryId + " and blog_id=" + strBlogId + "))";
         sql += " and (select count(a.id) from article as a inner join category as c on c.id = a.category_id where posted=0 and c.blog_id=" + strBlogId + ") < " + maxNotPostedCount;
         sql += sourceId != null ? " and exists " + "(select 1 from article as a inner join category as c on a.category_id = c.id where c.blog_id=" + strBlogId + " and a.id=" + strSourceId + ")" : "";
@@ -250,8 +251,8 @@ public class ArticleController {
         final String strCategoryId = String.valueOf(categoryId);
 
         String sql = "update article set ";
-        sql += "title='" + title + "', content='" + content + "', head='" + head + "'";
-        sql += ", posted=" + strPosted + ", post_at=" + strPostAt + ", thumbnail='" + thumbnail +"', category_id=" + strCategoryId;
+        sql += "title='" + title.replace("'", "\\'") + "', content='" + content.replace("'", "\\'") + "', head='" + head.replace("'", "\\'") + "'";
+        sql += ", posted=" + strPosted + ", post_at=" + strPostAt + ", thumbnail='" + thumbnail.replace("'", "\\'") +"', category_id=" + strCategoryId;
         sql += " where id=" + articleId;
         sql += " and exists " + "(select 1 from category where id=" +  strCategoryId + " and blog_id=" + strBlogId + ")";
 

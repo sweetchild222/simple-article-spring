@@ -10,7 +10,7 @@
 	</parent>
     <groupId>net.inkuk</groupId>
 	<artifactId>simple-article</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.6</version>
 	<name>simple-article</name>
 	<description>simple article backend</description>
 	<url/>
@@ -77,6 +77,7 @@
     </dependencies>
 
 	<build>
+        <finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

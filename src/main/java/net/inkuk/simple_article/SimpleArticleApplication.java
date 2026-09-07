@@ -2,6 +2,7 @@ package net.inkuk.simple_article;
 
 import jakarta.annotation.PostConstruct;
 import net.inkuk.simple_article.util.Log;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -27,11 +28,17 @@ public class SimpleArticleApplication implements ApplicationRunner {
         Log.info("info is green");
         Log.error("error is red");
         Log.debug("debug is yellow");
+
+        Package pkg = SimpleArticleApplication.class.getPackage();
+        String version = (pkg != null) ? pkg.getImplementationVersion() : null;
+
+        if(version != null)
+            Log.info("Version : " + version);
 	}
 
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(@NotNull ApplicationArguments args) throws Exception {
 
     }
 

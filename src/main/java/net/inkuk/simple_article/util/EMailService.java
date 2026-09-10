@@ -23,7 +23,7 @@ public class EMailService {
         try {
 
             String body = "<h3>" + "Here is your verification code" + "</h3>";
-            body += "<h1>" + code + "</h1>";
+            body += "<br/><h1>" + code + "</h1><br/>";
             body += "<h3>" + "this verification code is valid for one hour" + "</h3>";
 
             message.setRecipients(MimeMessage.RecipientType.TO, email);
@@ -68,7 +68,7 @@ public class EMailService {
         try {
 
             String body = "<h3>" + "Here is a temporary password" + "</h3>";
-            body += "<h1>" + password + "</h1>";
+            body += "<br/><h1>" + password + "</h1><br/>";
 
             message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("Temporary password by leafstory");

@@ -2,5 +2,5 @@
 
 export JAVA_HOME=/usr/lib/jvm/jdk-21
 export PATH=$JAVA_HOME/bin:$PATH
-kill $(ps aux | grep 'simple-article.jar' | awk '{print $2}')
+pkill -f 'simple-article.jar'
 nohup java -jar ~/simple/simple-article.jar --enable-native-access=ALL-UNNAMED  --spring.profiles.active=prod > /dev/null &

@@ -33,7 +33,7 @@ public class SimpleArticleApplication implements ApplicationRunner {
         String version = (pkg != null) ? pkg.getImplementationVersion() : null;
 
         if(version != null)
-            Log.info("Version : " + version);
+            Log.info("version : " + version);
 	}
 
 

@@ -2,7 +2,7 @@
 scp -i Lightsail.pem target\simple-article.jar ubuntu@3.38.108.151:~/simple/.
 
 #run
-ssh -i Lightsail.pem ubuntu@3.38.108.151 "./simple/run.sh"
+ssh -i Lightsail.pem ubuntu@3.38.108.151 "./simple/run_remote.sh"
 
 #kill
-ssh -i Lightsail.pem ubuntu@3.38.108.151 "pkill -e 'simple-article.jar' || echo 'no pid'"
+ssh -i Lightsail.pem ubuntu@3.38.108.151 "pkill -f 'simple-article.jar' || echo 'no pid'"

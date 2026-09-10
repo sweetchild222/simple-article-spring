@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/article/{articleId}/showed").permitAll()
                         .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/subscribe/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/user/{userId}/password/{password}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/user/{userId}/password").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/{userId}/bookmark").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/{userId}/alarm").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/**").permitAll()

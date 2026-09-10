@@ -244,12 +244,16 @@ public class UserController {
     }
 
 
-
-    @GetMapping("/user/{userId}/password/{password}")
-    public ResponseEntity<?> getCheckPassword(@PathVariable long userId, @PathVariable String password) {
+    @PostMapping("/user/{userId}/password")
+    public ResponseEntity<?> getCheckPassword(@PathVariable long userId, @RequestBody @NotNull Map<String, String> payload) {
 
         if(userId != UserContext.userID())
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        final String password = payload.get("password");
+
+        if(password == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         final String sql = "select password from user where id=" + userId;
 

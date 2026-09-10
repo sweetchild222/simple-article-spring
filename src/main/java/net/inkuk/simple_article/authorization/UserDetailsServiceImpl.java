@@ -2,6 +2,7 @@ package net.inkuk.simple_article.authorization;
 
 import lombok.RequiredArgsConstructor;
 import net.inkuk.simple_article.database.DataBaseClientPool;
+import net.inkuk.simple_article.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

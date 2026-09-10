@@ -57,6 +57,9 @@ public class CommentGreatController {
         if(userId == null || commentId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(UserContext.userID() !=  userId.longValue())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
         String sql = "insert ignore into comment_great (user_id, comment_id, great) ";
         sql += "select " + userId + ", " + commentId + ", "  + great + " ";
         sql += "where not exists ";

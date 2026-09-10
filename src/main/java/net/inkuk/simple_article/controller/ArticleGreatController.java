@@ -49,6 +49,9 @@ public class ArticleGreatController {
         if(userId == null || articleId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        if(UserContext.userID() !=  userId.longValue())
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
         String sql = "insert ignore into article_great (user_id, article_id, great) ";
         sql += "select " + userId + ", " + articleId + ", "  + great + " ";
         sql += "where not exists ";

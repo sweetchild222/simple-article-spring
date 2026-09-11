@@ -2,6 +2,7 @@ package net.inkuk.simple_article.util;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EMailService {
+
+    @Value("${spring.mail.username}")
+    private String username;
 
     private final JavaMailSender javaMailSender;
 
@@ -27,8 +31,9 @@ public class EMailService {
             body += "<h3>" + "this verification code is valid for one hour" + "</h3>";
 
             message.setRecipients(MimeMessage.RecipientType.TO, email);
-            message.setSubject("Verification code by leafstory");
+            message.setSubject("Verification code by Leaf story");
             message.setText(body,"UTF-8", "html");
+            message.setFrom(username);
 
             return message;
 
@@ -65,14 +70,17 @@ public class EMailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
+        final String tagValue = password.replace("<", "&lt;").replace(">", "&gt;");
+
         try {
 
             String body = "<h3>" + "Here is a temporary password" + "</h3>";
-            body += "<br/><h1>" + password + "</h1><br/>";
+            body += "<br/><h1>" + tagValue + "</h1><br/>";
 
             message.setRecipients(MimeMessage.RecipientType.TO, email);
-            message.setSubject("Temporary password by leafstory");
+            message.setSubject("Temporary password by Leaf story");
             message.setText(body,"UTF-8", "html");
+            message.setFrom(username);
 
             return message;
 

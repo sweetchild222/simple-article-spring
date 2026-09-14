@@ -1,60 +1,92 @@
-dsfaslfjsldjfwoefwefjowejfowejf
+
+# Open Spring
+
+
+이것은 구현한 Java Spring 프로그램으로 입니다. 아래는 사이트가 배포된 주소입니다.
+누구나 회원 가입을 하고 블로그를 운영할 수 있는 서비스입니다.
+마크 다운 형식으로 글을 작성할 수 있습니다. 구현된 사이트는 아래와 같습니다.
+
+https://leafstory.click
+
+
+https://Open React
+
+
+JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. Spring을 구현합니다.
+
+현재
+
+
+<style>
+    table {
+        
+        border-collapse: collapse; /* Apply to the table element */
+        thead {
+
+            tr{
+                th{
+                    border : 1px solid;            
+                }
+            }       
+        }
+
+        tbody {
+            tr{
+                td{
+                    
+                    border: 2px solid red;
+                    background-color: #fff;
+                    background-clip: padding-box; /* Fixes background overlap */
+                }
+                
+                
+            }
+        }
+    }
+
+</style>
 
 <details>
-  <summary>Click to expand/collapse</summary>
-  <table>
-            <caption>우도입도 총괄요금표</caption>
-            <colgroup>
-                <col style="background-color:darkseagreen;">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th rowspan="2">구분</th>
-                    <th colspan="3" style="background-color:wheat;">우도입도 총괄요금표</th>
-                    <!-- <th></th> -->
-                    <!-- <th></th> -->
-                </tr>
-                <tr>
-                    <!-- <th></th> -->
-                    <th>선박요금</th>
-                    <th>도립공원입장료</th>
-                    <th>터미널이용료</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <td colspan="4" style="background-color: white;">*이륜차(오토바이,자전거) 및 화물차량은 별도 문의</td>
-                    <!-- <td></td> -->
-                    <!-- <td></td> -->
-                    <!-- <td></td> -->
-                </tr>
-            </tfoot>
-            <tbody>
-                <tr>
-                    <th>성인</th>
-                    <td>2,000원</td>
-                    <td>1,000원</td>
-                    <td>500원</td>
-                </tr>
-                <tr>
-                    <th>중학생이상</th>
-                    <td>2,000원</td>
-                    <td>800원</td>
-                    <td>300원</td>
-                </tr>
-                <tr>
-                    <th>초등학생</th>
-                    <td>700원</td>
-                    <td>500원</td>
-                    <td>300원</td>
-                </tr>
-            </tbody>
-        </table>
+
+
+  <summary>Alarm</summary>
+    <table style="border-collapse: collapse;">
+        <caption>알람 관련 API</caption>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>URL</th>
+                <th>Query parameter</th>
+                <th>Request payload</th>
+                <th>Response payload</th>
+                <th>Access authroity</th>
+            </tr>
+        </thead>
+        <tbody style="white-space: pre;">
+            <tr>
+                <td>api/alarm</td>
+                <td>{<br/>&emsp;aaa:"sdfs",<br/>&emsp;sdfsdf:"sdf",<br/>}</td>
+                <td>500원</td>
+                <td>Permit all</td>
+                <td>Authenticated</td>
+                <td>Authenticated</td>
+            </tr>
+            <tr>
+                <td>중학생이상</td>
+                <td>2,000원</td>
+                <td>800원</td>
+                <td>300원</td>
+                <td>500원</td>
+                <td>500원</td>
+            </tr>
+            <tr>
+                <td>초등학생</td>
+                <td>700원</td>
+                <td>500원</td>
+                <td>300원</td>
+                <td>500원</td>
+                <td>500원</td>
+            </tr>
+        </tbody>
+    </table>
 </details>
-
-
-  <summary>Click to expand/collapse</summary>
-  This is the hidden content that appears when you click.
-  You can use standard **Markdown** or HTML inside here.
-
-

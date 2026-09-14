@@ -1,48 +1,74 @@
-<table>
-            <caption>우도입도 총괄요금표</caption>
-            <colgroup>
-                <col style="background-color:darkseagreen;">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th rowspan="2">구분</th>
-                    <th colspan="3" style="background-color:wheat;">우도입도 총괄요금표</th>
-                    <!-- <th></th> -->
-                    <!-- <th></th> -->
-                </tr>
-                <tr>
-                    <!-- <th></th> -->
-                    <th>선박요금</th>
-                    <th>도립공원입장료</th>
-                    <th>터미널이용료</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <td colspan="4" style="background-color: white;">*이륜차(오토바이,자전거) 및 화물차량은 별도 문의</td>
-                    <!-- <td></td> -->
-                    <!-- <td></td> -->
-                    <!-- <td></td> -->
-                </tr>
-            </tfoot>
-            <tbody>
-                <tr>
-                    <th>성인</th>
-                    <td>2,000원</td>
-                    <td>1,000원</td>
-                    <td>500원</td>
-                </tr>
-                <tr>
-                    <th>중학생이상</th>
-                    <td>2,000원</td>
-                    <td>800원</td>
-                    <td>300원</td>
-                </tr>
-                <tr>
-                    <th>초등학생</th>
-                    <td>700원</td>
-                    <td>500원</td>
-                    <td>300원</td>
-                </tr>
-            </tbody>
-        </table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collapsible Div</title>
+    <style>
+        /* Style for the button/header */
+        .collapsible-btn {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        /* Active class to change color on click */
+        .active, .collapsible-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Style for the expandable content container */
+        .content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: #f1f1f1;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .content p {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Clickable Header -->
+    <button class="collapsible-btn" onclick="toggleContent(this)">Click to Expand / Collapse</button>
+    
+    <!-- Hidden Content -->
+    <div class="content">
+        <p>This is the content inside the div. It will spread out when you click the button above, and collapse when you click it again!</p>
+    </div>
+
+    <script>
+        function toggleContent(button) {
+            // Toggle the 'active' class on the button
+            button.classList.toggle("active");
+            
+            // Get the next element sibling (the .content div)
+            var content = button.nextElementSibling;
+            
+            // If open, close it. If closed, open it.
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                // scrollHeight calculates the exact height of the hidden text
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        }
+    </script>
+
+</body>
+</html>
+
+

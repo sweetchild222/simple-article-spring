@@ -26,34 +26,29 @@ JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. 
             <tr>                
                 <th style="border: 1px solid">Address</th>
                 <th style="border: 1px solid">Request payload</th>
-                <th style="border: 1px solid">Response payload</th>
-                <th style="border: 1px solid">Access constraint</th>
+                <th style="border: 1px solid">Response payload</th>            
             </tr>
         </thead>
         <tbody style="white-space: pre; color: white;">
             <tr>                
                 <td style="border: 1px solid;"><i>Get</i><br/>api/user/:userId/alarm</td>
                 <td style="border: 1px solid"></td>
-                <td style="border: 1px solid">[<br/>&emsp;{<br/>&emsp;&emsp;"article_id": 561,<br/>&emsp;&emsp;"blog_id": 37,<br/>&emsp;&emsp;"to_user_id": 218,<br/>&emsp;&emsp;"checked": 1,<br/>&emsp;&emsp;"comment": "Very good",<br/>&emsp;&emsp;"id": 134,<br/>&emsp;&emsp;"type": "COMMENT",<br/>&emsp;&emsp;"create_at": 1787822522000,<br/>&emsp;&emsp;"comment_id": 724,<br/>&emsp;&emsp;"from_user_id": 217<br/>&emsp;}<br/>]</td>
-                <td style="border: 1px solid">the userId and authenticated user_id<br/>must be equal</td>
+                <td style="border: 1px solid">[<br/>&emsp;{<br/>&emsp;&emsp;"article_id": 561,<br/>&emsp;&emsp;"blog_id": 37,<br/>&emsp;&emsp;"to_user_id": 218,<br/>&emsp;&emsp;"checked": 1,<br/>&emsp;&emsp;"comment": "Very good",<br/>&emsp;&emsp;"id": 134,<br/>&emsp;&emsp;"type": "COMMENT",<br/>&emsp;&emsp;"create_at": 1787822522000,<br/>&emsp;&emsp;"comment_id": 724,<br/>&emsp;&emsp;"from_user_id": 217<br/>&emsp;}<br/>]</td>                
             </tr>
             <tr>                
                 <td style="border: 1px solid"><i>Post</i><br/>api/alarm</td>
                 <td style="border: 1px solid">{<br/>&emsp;to_user_id: 3,<br/>&emsp;from_user_id: 10,<br/><div title="or 'REPLY', 'MENTION'">&emsp;<u>type: 'COMMENT',</u>&emsp;</div>&emsp;comment_id: 15<br/>}</td>
-                <td style="border: 1px solid">{<br/><div title="created alarm id">&emsp;<u>id: 30</u></div>}</td>
-                <td style="border: 1px solid">the from_user_id and authenticated user_id<br/>must be equal</td>
+                <td style="border: 1px solid">{<br/><div title="created alarm id">&emsp;<u>id: 30</u></div>}</td>                
             </tr>
             <tr>                
                 <td style="border: 1px solid">Patch<br/>api/alarm/:alarmId</td>
                 <td style="border: 1px solid">{<br/>&emsp;checked: 1,&emsp;//or 0<br/>}</td>
-                <td style="border: 1px solid"></td>
-                <td style="border: 1px solid">the to_user_id of the alarm and authenticated user_id<br/>must be equal</td>
+                <td style="border: 1px solid"></td>            
             </tr>
             <tr>                
                 <td style="border: 1px solid">Delete<br/>api/alarm/:alarmId</td>
                 <td style="border: 1px solid"></td>
                 <td style="border: 1px solid"></td>
-                <td style="border: 1px solid">the to_user_id of the alarm and authenticated user_id<br/>must be equal</td>
             </tr>
         </tbody>
     </table>

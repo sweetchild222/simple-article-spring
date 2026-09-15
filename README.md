@@ -37,7 +37,7 @@ JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. 
             </tr>
             <tr>                
                 <td style="border: 1px solid"><i>Post</i><br/>api/alarm</td>
-                <td style="border: 1px solid">{<br/>&emsp;to_user_id: 3,<br/>&emsp;from_user_id: 10,<br/><div title="or 'REPLY', 'MENTION'">&emsp;<u>type: 'COMMENT',</u>&emsp;</div>&emsp;comment_id: 15<br/>}</td>
+                <td style="border: 1px solid">{<br/>&emsp;to_user_id: 3,<br/>&emsp;from_user_id: 10,<br/><div title="or 'REPLY', 'MENTION'">&emsp;<ins>type: 'COMMENT',</ins>&emsp;</div>&emsp;comment_id: 15<br/>}</td>
                 <td style="border: 1px solid">{<br/><div title="created alarm id">&emsp;<u>id: 30</u></div>}</td>                
             </tr>
             <tr>                

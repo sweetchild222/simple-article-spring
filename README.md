@@ -1,4 +1,43 @@
 <details>
+  <summary>Alarm API</summary>
+    <table style="border-collapse: collapse;">        
+        <thead style="background-color:gray; color:lightGray;">
+            <tr>                
+                <th style="border: 1px solid;">Request</th>
+                <th style="border: 1px solid;">Response</th>
+                <th style="border: 1px solid">Access constraint</th>
+            </tr>
+        </thead>
+        <tbody style="white-space: pre; color: white;">
+            <tr>
+                <td style="border: 1px solid;"><i>Get</i> api/user/:userId/alarm</td>
+                <td style="border: 1px solid">[<br/>&emsp;{<br/>&emsp;&emsp;article_id: 561,<br/>&emsp;&emsp;blog_id: 37,<br/>&emsp;&emsp;to_user_id: 218,<br/>&emsp;&emsp;checked: 1,<br/>&emsp;&emsp;comment: 'Very good',<br/>&emsp;&emsp;id: 134,<br/>&emsp;&emsp;<span title="or 'REPLY', 'MENTION'"><ins>type: 'COMMENT',</ins></span><br/>&emsp;&emsp;create_at: 1787822522000,<br/>&emsp;&emsp;comment_id: 724,<br/>&emsp;&emsp;from_user_id: 217<br/>&emsp;}<br/>]</td>
+                <td style="border: 1px solid">the userId<br/>and<br/>authenticated user_id<br/>must be equal</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid"><i>Post</i> api/alarm<br/><br/>{<br/>&emsp;to_user_id: 3,<br/>&emsp;from_user_id: 10,<br/>&emsp;<span title="or 'REPLY', 'MENTION'"><ins>type: 'COMMENT',</ins>&emsp;</span></br>&emsp;comment_id: 15<br/>}</td>
+                <td style="border: 1px solid">{<br/><div title="Created alarm id">&emsp;<ins>id: 30</ins></div>}</td>
+                <td style="border: 1px solid">the from_user_id<br/>and<br/>authenticated user_id<br/>must be equal</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid"><i>Patch</i> api/alarm/:alarmId<br/><br/>{<br/>&emsp;checked: 1<br/>}</td>
+                <td style="border: 1px solid"></td>
+                <td style="border: 1px solid">the to_user_id of the alarm<br/>and<br/>authenticated user_id <br/>must be equal</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid"><i>Delete</i> api/alarm/:alarmId</td>
+                <td style="border: 1px solid"></td>
+                <td style="border: 1px solid">the to_user_id of the alarm<br/>and<br/>authenticated user_id <br/>must be equal</td>
+            </tr>
+        </tbody>
+    </table>
+</details>
+
+
+
+
+
+<details>
   <summary>Article API</summary>
     <table style="border-collapse: collapse;">
         <thead style="background-color:gray; color:lightGray;">

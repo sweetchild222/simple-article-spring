@@ -24,9 +24,9 @@ JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. 
         <caption>댓글, 답글에 대한 알람</caption>
         <thead style="background-color:gray; color:lightGray;">
             <tr>                
-                <th style="border: 1px solid">Address</th>
-                <th style="border: 1px solid">Request payload</th>
-                <th style="border: 1px solid">Response payload</th>            
+                <th style="border: 1px solid; width:400px;">Address</th>
+                <th style="border: 1px solid; width:400px;">Request payload</th>
+                <th style="border: 1px solid; width:400px;">Response payload</th>            
             </tr>
         </thead>
         <tbody style="white-space: pre; color: white;">
@@ -38,7 +38,7 @@ JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. 
             <tr>                
                 <td style="border: 1px solid"><i>Post</i><br/>api/alarm</td>
                 <td style="border: 1px solid">{<br/>&emsp;to_user_id: 3,<br/>&emsp;from_user_id: 10,<br/><div title="or 'REPLY', 'MENTION'">&emsp;<ins>type: 'COMMENT',</ins>&emsp;</div>&emsp;comment_id: 15<br/>}</td>
-                <td style="border: 1px solid">{<br/><div title="created alarm id">&emsp;<u>id: 30</u></div>}</td>                
+                <td style="border: 1px solid">{<br/><div title="Created alarm id">&emsp;<ins>id: 30</ins></div>}</td>                
             </tr>
             <tr>                
                 <td style="border: 1px solid">Patch<br/>api/alarm/:alarmId</td>

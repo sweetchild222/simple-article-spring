@@ -20,13 +20,13 @@ JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. 
 
 <details>
   <summary>Alarm</summary>
-    <table style="border-collapse: collapse; width:1200px; min-width:1200px; max-width:1200px;">
+    <table style="border-collapse: collapse; width:100%;">
         <caption>댓글, 답글에 대한 알람</caption>
         <thead style="background-color:gray; color:lightGray;">
             <tr>                
-                <th style="border: 1px solid; width:400px;">Address</th>
-                <th style="border: 1px solid; width:400px;">Request payload</th>
-                <th style="border: 1px solid; width:400px;">Response payload</th>            
+                <th style="border: 1px solid;">Address</th>
+                <th style="border: 1px solid;">Request payload</th>
+                <th style="border: 1px solid;">Response payload</th>            
             </tr>
         </thead>
         <tbody style="white-space: pre; color: white;">

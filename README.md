@@ -20,7 +20,7 @@ JPA나 MyBartis를 사용하지 않고, 저 수준의 MySQL을 구현합니다. 
 
 <details>
   <summary>Alarm</summary>
-    <table style="border-collapse: collapse;">
+    <table style="border-collapse: collapse; width:1200px">
         <caption>댓글, 답글에 대한 알람</caption>
         <thead style="background-color:gray; color:lightGray;">
             <tr>                

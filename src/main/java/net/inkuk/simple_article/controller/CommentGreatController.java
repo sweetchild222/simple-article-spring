@@ -87,7 +87,7 @@ public class CommentGreatController {
         if(great == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!(great.equals(-1)  || great.equals(1)))
+        if(!(great.equals(-1) || great.equals(1)))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String sql = "update comment_great set great = '" + great + "'";

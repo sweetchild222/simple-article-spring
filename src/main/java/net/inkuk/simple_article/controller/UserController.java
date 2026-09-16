@@ -84,7 +84,7 @@ public class UserController {
 
 
 
-    @GetMapping("/user/exist/{username}")
+    @GetMapping("/user/{username}/exist")
     public ResponseEntity<?> getUserExist(@PathVariable String username) {
 
         if(username.length() > 50)

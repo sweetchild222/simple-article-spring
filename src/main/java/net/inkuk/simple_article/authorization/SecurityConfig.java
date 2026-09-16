@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/certify/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/certify/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/password-reset/email/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/user/exist/{username}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/{username}/exist").permitAll()
                         .requestMatchers(HttpMethod.GET, "/blob/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/article/**").permitAll()

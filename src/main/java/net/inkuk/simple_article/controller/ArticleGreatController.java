@@ -46,7 +46,7 @@ public class ArticleGreatController {
         final Number articleId = ObjectCovert.asNumber(payload.get("article_id"));
         final Number great = ObjectCovert.asNumber(payload.get("great"));
 
-        if(userId == null || articleId == null)
+        if(userId == null || articleId == null || great == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(UserContext.userID() !=  userId.longValue())

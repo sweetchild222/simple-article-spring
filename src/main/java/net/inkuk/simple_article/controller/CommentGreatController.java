@@ -54,7 +54,7 @@ public class CommentGreatController {
         final Number commentId = ObjectCovert.asNumber(payload.get("comment_id"));
         final Number great = ObjectCovert.asNumber(payload.get("great"));
 
-        if(userId == null || commentId == null)
+        if(userId == null || commentId == null || great == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         if(UserContext.userID() !=  userId.longValue())
